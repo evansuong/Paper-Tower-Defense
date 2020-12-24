@@ -1,0 +1,33 @@
+body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-color: aliceblue;
+}
+
+canvas {
+  width: 500px;
+  height: 500px;
+}
+
+.game-board {
+  border-color: black;
+  border-width: 10px;
+  border-style: solid;
+}
+
+/* use this for when you're holding a tower and you gotta place it, set the classname to heightlighted whenever you're above the node */
+.highlighted {
+  background-color: aliceblue;
+}
+
+.enemy {
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  background-color: purple;
+  position: absolute;
+}
