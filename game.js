@@ -1,32 +1,70 @@
+import { constants } from "./constants.js";
 
-const LIVES = {
-  easy: 25,
-  medium: 15,
-  hard: 5,
-};
-const GRID_DIMS = 20;
+const { LIVES, GRID_DIMS, MAP_SIZE, START_MONEY } = constants;
 
 export function Game(difficulty) {
   this.map = {
     enemies: [],
     towers: [],
-    width: 750,
-    height: 750,
+    width: MAP_SIZE,
+    height: MAP_SIZE,
     gridDims: GRID_DIMS,
-    grid: new Grid(GRID_DIMS),
+    nodeSize: MAP_SIZE / GRID_DIMS,
+    grid: new Grid(GRID_DIMS, difficulty),
   };
   this.stats = {
     lives: LIVES[difficulty],
-    money: 10000,
+    money: START_MONEY,
     level: 0,
     difficulty: difficulty,
   };
 }
 
 Game.prototype.update = function() {
+
+  // update enemy 
   this.map.enemies.forEach(enemy => {
     enemy.update(this.map.width, this.map.height);
+  });
+
+  // for each tower, find if there are enemies in range
+  this.map.towers.forEach(tower => {
+    
+    // for each enemy in range, call shoot on them
+    let enemiesInRange = this.getEnemiesInRange(tower);
+    if(enemiesInRange) tower.shoot(enemiesInRange);
   })
+}
+
+Game.prototype.getEnemiesInRange = function(tower) {
+  let enemiesInRange = [];
+
+  // if there are no enemies return
+  if (this.map.enemies.length === 0) return;
+
+  this.map.enemies.forEach(enemy => {
+
+    let { col, row } = enemy.getCurrentNode();
+
+    // check if enemy is in the range of this tower
+    if(col > tower.col - tower.range[tower.level] / 2 &&
+       col < tower.col + tower.range[tower.level] / 2 &&
+       row > tower.row - tower.range[tower.level] / 2 &&
+       row < tower.row + tower.range[tower.level] / 2) {
+
+        // add the enemy to range list
+        enemiesInRange.push(enemy);
+        console.log('found enemy')
+
+        // return when we have added the max amount of enemies for the tower
+        if (enemiesInRange.length === tower.shotSpread) {
+          console.log('returning enemies in range');
+          return;
+        }
+      }
+  })
+
+  return enemiesInRange;
 }
 
 Game.prototype.startNextLevel = function() {
@@ -38,23 +76,66 @@ Game.prototype.startNextLevel = function() {
 Game.prototype.createEnemy = function(enemyType) {
   console.log('creating enemy');
   let startNode = this.map.grid.getStartNode();
+  let endNode = this.map.grid.getEndNode();
   let enemyCount = this.map.enemies.length;
   let enemy = new Enemy(
     enemyType, 
     enemyCount, 
-    startNode.x, 
-    startNode.y, 
+    startNode.col, 
+    startNode.row,
+    endNode.col,
+    endNode.row, 
     this.map.grid,
-    this.map.width / this.map.gridDims,
-    (index) => this.onEnemyReachedEnd(index));
+    this.map.nodeSize,
+    (index) => this.onEnemyReachedEnd(index),
+    (index) => this.onEnemyDeath(index),
+    this.stats.difficulty,
+  )
   this.map.enemies.push(enemy);
 }
 
-Game.prototype.onEnemyReachedEnd = function(index) {
-  this.map.enemies = this.map.enemies.filter(enemy => enemy.index !== index);
-  console.log('enemy', index, 'reached end');
+Game.prototype.buildTower = function(towerType, x, y, difficulty) {
+
+  // get grid row and column 
+  let col = Math.floor(x / this.map.nodeSize);
+  let row = Math.floor(y / this.map.nodeSize);
+
+  // create new tower
+  let tower = new Tower(towerType, col, row, difficulty);
+
+  // place tower node in grid
+  this.map.grid.nodes = this.map.grid.placeTower(tower);
+
+  // add new tower to game tower list
+  this.map.towers.push(tower);
+
+  // reset enemy search 
+  this.map.enemies.forEach(enemy => {
+    enemy.findPath();
+  })
 }
 
+Game.prototype.sellTower = function() {
+
+}
+
+Game.prototype.onEnemyReachedEnd = function(index) {
+
+  // filter out the enemy that reached end
+  this.map.enemies = this.map.enemies.filter(enemy => enemy.index !== index);
+  console.log('enemy', index, 'reached end');
+
+  // decrement life counter
+}
+
+Game.prototype.onEnemyDeath = function(index) {
+
+  // filter out the enemy that died
+  this.map.enemies = this.map.enemies.filter(enemy => enemy.index !== index);
+  console.log('enemy', index, 'died');
+
+  // decrement enemy counter
+}
 
 
 
@@ -64,21 +145,22 @@ Game.prototype.onEnemyReachedEnd = function(index) {
 ////////////////////////////
 ////        GRID        ////
 ////////////////////////////
-const START_POS = {
-  x: 0, 
-  y: 10,
-}
-const END_POS = {
-  x: 19,
-  y: 10
+const { START_POS, END_POS } = constants
+
+export function Grid(gridDims, difficulty) {
+  this.nodes  = this.buildGrid(gridDims, difficulty); 
 }
 
-export function Grid(gridDims) {
-  this.nodes = buildGrid(gridDims);
+Grid.prototype.placeTower = function(tower) {
+  this.nodes[tower.row * GRID_DIMS + tower.col] = new TowerNode(tower);
+  return this.nodes;
 }
 
-Grid.prototype.update = function() {
-  // console.log('grid update')
+Grid.prototype.removeTower = function() {
+
+}
+
+Grid.prototype.getNode = function(x, y) {
 }
 
 Grid.prototype.getStartNode = function() {
@@ -89,27 +171,30 @@ Grid.prototype.getEndNode = function() {
   return END_POS;
 }
 
-function buildGrid(gridDims) {
-  console.log('building grid')
-  let cells = [];
-  for (let y = 0; y < gridDims; y++) {
-    for (let x = 0; x < gridDims; x++) {
-      if(x === START_POS.x && y === START_POS.y) {
-        // push end tile
-        console.log('pushing start tile')
-        cells.push(new StartNode(x, y));
-      } else if (x === END_POS.x && y === END_POS.y) {
-        // push start tile
-        console.log('pushing end tile')
-        cells.push(new EndNode(x, y));
+Grid.prototype.buildGrid = function(gridDims, difficulty) {
+
+  let nodes = [];
+
+  // build a 20x20 grid of nodes
+  for (let row = 0; row < gridDims; row++) {
+    for (let col = 0; col < gridDims; col++) {
+
+      // push the start node
+      if(col === START_POS.col && row === START_POS.row) {
+        nodes.push(new StartNode(col, row));
+
+      // push the end node
+      } else if (col === END_POS.col && row === END_POS.row) {
+        nodes.push(new EndNode(col, row));
+
+      // push an empty node 
       } else {  
         // push regular tile
-        console.log('another cell')
-        cells.push(new EmptyNode(x, y));
+        nodes.push(new EmptyNode(col, row));
       }
     }
   }
-  return cells;
+  return nodes;
 }
 
 // function checkTile(position) {
@@ -142,28 +227,27 @@ function buildGrid(gridDims) {
 //////////////////////////////////
 ////        GRID NODES        ////
 //////////////////////////////////
-function _Node(type, isEmpty, x, y) {
+function _Node(type, isEmpty, col, row) {
   this.type = type;
   this.isEmpty = isEmpty;
   this.isStart = false;
   this.isEnd = false;
-  this.x = x;
-  this.y = y;
-  this.distance = Infinity;
-  this.isVisited = false;
+  this.col = col;
+  this.row = row;
 }
 
-export function EmptyNode(x, y) {
-  _Node.apply(this, [ 'empty', true, x, y ]);
+
+export function EmptyNode(col, row) {
+  _Node.apply(this, [ 'empty', true, col, row ]);
 }
 
-export function StartNode(x, y) {
-  _Node.apply(this, [ 'start', true, x, y ]);
+export function StartNode(col, row) {
+  _Node.apply(this, [ 'start', true, col, row ]);
   this.isStart = true;
 }
 
-export function EndNode(x, y) {
-  _Node.apply(this, [ 'end', true, x, y ]);
+export function EndNode(col, row) {
+  _Node.apply(this, [ 'end', true, col, row ]);
   this.isEnd = true;
 }
 
@@ -173,8 +257,8 @@ EndNode.prototype.onEnemyEnter = function() {
 }
 
 
-export function TowerNode(x, y, tower) {
-  _Node.apply(this, [ 'tower', false, x, y ]);
+export function TowerNode(tower) {
+  _Node.apply(this, [ 'tower', false, tower.col, tower.row ]);
   this.tower = tower;
 }
 
@@ -193,14 +277,30 @@ export function TowerNode(x, y, tower) {
 /////////////////////////
 ////      TOWER      ////
 /////////////////////////
+const TOWER_STATS = constants.TOWER_STATS;
+
+export function Tower(type, col, row, difficulty) {
+  this.type           = type;
+  this.damage         = TOWER_STATS[type][difficulty].damage;
+  this.cost           = TOWER_STATS[type][difficulty].cost;
+  this.range          = TOWER_STATS[type][difficulty].range;
+  this.shotsPerSecond = TOWER_STATS[type][difficulty].shotsPerSecond;
+  this.shotSpread     = TOWER_STATS[type][difficulty].shotSpread;
+  this.col            = col;
+  this.row            = row;
+  this.level          = 1;
+}
 
 
+Tower.prototype.shoot = function(enemiesInRange) {
 
-
-
-
-
-
+  // TODO: HAVE TOWERS SHOOT AT FIXED TIMES
+  // shoot every enemy in range
+  enemiesInRange.forEach(enemy => {
+    console.log('shooting enemy', enemy)
+    enemy.getShot(this.damage[this.level]);
+  })
+}
 
 
 
@@ -214,31 +314,41 @@ export function TowerNode(x, y, tower) {
 ////         ENEMY           ////
 /////////////////////////////////
 
-export function Enemy(type, index, x, y, grid, nodeSize, onReachedEnd) {
-  this.type = type;
-  this.index = index;
-  this.currentNode = { x: x, y: y }, 
-  this.x = x * nodeSize;
-  this.y = y * nodeSize;
-  this.width = 25;
-  this.height = 25;
-  this.grid = grid;
-  this.nodeSize = nodeSize;
-  this.path = this.findPath();
-  this.speed = 10;
-  this.onReachedEnd = onReachedEnd;
+const { ENEMY_STATS, ENEMY_COLORS, ENEMY_SIZE } = constants; 
+
+export function Enemy(
+  type, 
+  index, 
+  spawnCol, 
+  spawnRow, 
+  endCol, 
+  endRow, 
+  grid, 
+  nodeSize, 
+  onReachedEnd,
+  onDeath,
+  difficulty
+) 
+{
+  this.type           = type;
+  this.index          = index;
+  this.currentNode    = { col: spawnCol, row: spawnRow }, 
+  this.x              = spawnCol * nodeSize + ENEMY_SIZE / 2;
+  this.y              = spawnRow * nodeSize + ENEMY_SIZE / 2;
+  this.endNode        = { col: endCol, row: endRow },
+  this.grid           = grid;
+  this.nodeSize       = nodeSize;
+  this.color          = ENEMY_COLORS[type];
+  this.path           = [];
+  this.speed          = ENEMY_STATS[type][difficulty].speed;
+  this.startingHealth = ENEMY_STATS[type][difficulty].health;
+  this.currentHealth  = this.startingHealth; 
+  this.onReachedEnd   = onReachedEnd;
+  this.onDeath        = onDeath;
+  this.findPath()
 }
 
-// TODO: smooth motion
-//          create get current node for the current node the enemy is in
-//          figure out absolute position of enemey on grid based off cell size
-//          call the path shifting only when we enter a new node
-
 Enemy.prototype.update = function() {
-  // run pathfinding algorithm on grid
-  // figure out enemy movement
-    // up down left or right, or diagonal
-    // follow the dijkstra path
 
   // check if we made it to the end node
   if (this.path.length === 0) {
@@ -246,15 +356,14 @@ Enemy.prototype.update = function() {
     this.onReachedEnd(this.index);
     return;
   }
-  console.log(this.path.length)
-  // console.log(this.path.length)
 
-  // get current node the enemy is in
-  const currentNode = this.getCurrentNode();
-  let nextNode = {}
+  // get current row and column the enemy is in
+  const currentNode = this.getCurrentNode(); // node is just a row and column
+  let nextNode = {};
+  // console.log(this.path)
 
   // check to see if the enemy has moved to a new node
-  if (currentNode.x === this.currentNode.x && currentNode.y === this.currentNode.y) {
+  if (currentNode.col === this.currentNode.col && currentNode.row === this.currentNode.row) {
 
     // if we are still in the same node, don't change the path
     nextNode = this.path[0];
@@ -275,64 +384,103 @@ Enemy.prototype.update = function() {
 
 
 Enemy.prototype.getCurrentNode = function() {
-  // console.log(this.x, this.y, this.nodeSize)
+
 
   // get the current node that the enemy is in
-  let nodeX = Math.floor((this.x + (this.width / 2)) / this.nodeSize);
-  let nodeY = Math.floor((this.y + (this.width / 2)) / this.nodeSize);
+  let nodeX = Math.floor(this.x / this.nodeSize);
+  let nodeY = Math.floor(this.y / this.nodeSize);
+
   // console.log("from getcurrentnode", nodeX, nodeY)
-  return { x: nodeX, y: nodeY };
+  return { col: nodeX, row: nodeY };
 }
 
+
 Enemy.prototype.calculateMovement = function(nextNode, currentNode) {
+
+  // check if enemy should move horizontally and in what direction
   let xMovement = 0;
-  if (nextNode.x > currentNode.x) {
+
+  // is the next node in the column to left or right
+  if (nextNode.col > currentNode.col) {
     xMovement = this.speed;
-  } else if (nextNode.x < currentNode.x) {
+  } else if (nextNode.col < currentNode.col) {
     xMovement = -this.speed;
   }
+
+  // check if enemy should move vertically and in what direction
   let yMovement = 0;
-  if(nextNode.y > currentNode.y) {
+
+  // is the next node in the row above or below
+  if(nextNode.row > currentNode.row) {
     yMovement = this.speed;
-  } else if (nextNode.y < currentNode.y) {
+  } else if (nextNode.row < currentNode.row) {
     yMovement = -this.speed;
   }
+
+  // returns the amount and in which direction the enemy will move next update
   return { nextX: xMovement, nextY: yMovement };
 }
 
 // call this only when a tower is placed or the enemy spawns
 Enemy.prototype.findPath = function() {
+
+  // get current node as the start node
+  let startNode = this.getCurrentNode();
+  let endNode = { col: this.endNode.col, row: this.endNode.row };
+
+  // convert node grid to astar tranparency grid
   let aStarGrid = new Graph(buildAStarGrid(this.grid));
-  // do the A* algorithm here
-  var start = aStarGrid.grid[1][10];
-  var end = aStarGrid.grid[20][10];
-  console.log(start)
-  console.log(end)
-  var resultWithDiagonals = astar.search(aStarGrid, start, end, { heuristic: astar.heuristics.diagonal });
-  console.log(resultWithDiagonals)
-  return getPathFromAStar(resultWithDiagonals)
+
+  // declare start and end nodes
+  var start = aStarGrid.grid[startNode.row][startNode.col];
+  var end = aStarGrid.grid[endNode.row][endNode.col];
+
+  // console.log('start node 324', start)
+  // console.log('endNode 325', end)
+  // get shortest path from start to end node
+  var resultWithDiagonals = astar.search(
+    aStarGrid, 
+    start, 
+    end, 
+    {
+      heuristic: astar.heuristics.diagonal 
+    }
+  );
+  this.path = getPathFromAStar(resultWithDiagonals);
 }
 
+Enemy.prototype.getShot = function(damage) {
+  this.currentHealth = this.currentHealth - damage;
+  if(this.currentHealth <= 0) {
+    this.onDeath(this.index);
+  }
+}
+
+
+
 function buildAStarGrid(grid) {
-  let newGrid = [[]];
-  for (let y = 0; y < 20; y++) {
-    let row = [];
-    for (let x = 0; x < 20; x++) {
-      if(grid.nodes[20 * y + x].isEmpty === true) {
-        row.push(1);
+  // turn grid into 2D array of either empty of filled nodes
+  // console.log(grid.nodes)
+  let newGrid = [];
+  for (let row = 0; row < GRID_DIMS; row++) {
+    let gridRow = [];
+    for (let col = 0; col < GRID_DIMS; col++) {
+      if(grid.nodes[GRID_DIMS * row + col].isEmpty === true) {
+        gridRow.push(1);
       } else {
-        row.push(0);
+        gridRow.push(0);
       }
     }
-    newGrid.push(row);
+    newGrid.push(gridRow);
   }
   return newGrid;
 }
 
+
 function getPathFromAStar(path) {
   return path.map(node => {
-    console.log(node.x - 1, node.y)
-    return { x: node.x -1, y: node.y }
+    // the algorithm is kinda wierd and sets the column indices to be y
+    return { col: node.y, row: node.x }
   });
 }
 

@@ -4,15 +4,23 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title></title>
-    <meta name="description" content="">
+    <meta name="description" content="Tower Defense Game">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
     <title>Paper Defense</title> 
   </head>
   <body> 
-    <button id="start-btn">Start</button>
-    <div class="game-board">
-      <canvas width="750" height="750"></canvas>
+    <button id="spawn-btn">Spawn</button>
+    <button id="build-btn">Build</button>
+    <canvas width="750" height="750"></canvas>
+    
+    <div class="game-store">
+      <div id="pellet-tower" class="tower-wrapper"></div>
+      <div id="splash-tower" class="tower-wrapper"></div>
+      <div id="air-tower" class="tower-wrapper"></div>
+      <div id="ice-tower" class="tower-wrapper"></div>
+      <div id="earthquake-tower" class="tower-wrapper"></div>
+      <div id="machine-tower" class="tower-wrapper"></div>
     </div>
     <script src="script.js" async defer type="module"></script>
   </body>

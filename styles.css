@@ -11,6 +11,9 @@ body {
 canvas {
   width: 500px;
   height: 500px;
+  border-color: black;
+  border-width: 10px;
+  border-style: solid;
 }
 
 .game-board {
@@ -18,6 +21,79 @@ canvas {
   border-width: 10px;
   border-style: solid;
 }
+
+.game-store {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  border-color: aquamarine;
+  border-width: 10px;
+  border-style: solid;
+}
+
+.tower-wrapper {
+  width: 50px;
+  height: 50px;
+}
+
+.tower-wrapper:hover {
+  background-color: gray;
+}
+
+#pellet-tower {
+  background-color: black;
+}
+
+#pellet-tower-dragging {
+  background-color: black;
+}
+
+#splash-tower {
+  background-color: blue;
+}
+
+#splash-tower-dragging {
+  background-color: blue;
+}
+
+#air-tower {
+  background-color: yellow;
+}
+
+#air-tower-dragging {
+  background-color: yellow;
+}
+
+#ice-tower {
+  background-color: cyan;
+}
+
+#ice-tower-dragging {
+  background-color: cyan;
+}
+
+#earthquake-tower {
+ background-color: burlywood;
+}
+
+#earthquake-tower-dragging {
+  background-color: burlywood;
+}
+
+#machine-tower {
+  background-color: slategrey;
+}
+
+#machine-tower-dragging {
+  background-color: slategrey;
+}
+
+.mouse-drag-object {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+}
+
 
 /* use this for when you're holding a tower and you gotta place it, set the classname to heightlighted whenever you're above the node */
 .highlighted {
