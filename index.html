@@ -10,17 +10,27 @@
     <title>Paper Defense</title> 
   </head>
   <body> 
-    <button id="spawn-btn">Spawn</button>
-    <button id="build-btn">Build</button>
-    <canvas width="750" height="750"></canvas>
+    <div class="game-stats">
+      <p id="lives"></p>
+      <p id="money"></p>
+      <p id="level"></p>
+    </div>
+    <div class="btn-panel">
+      <button id="spawn-btn">Spawn</button>
+      <button id="next-lvl-btn">Next Level</button>
+      <button id="restart-btn">Restart</button>
+      <button id="money-btn">Add money</button>
+    </div>
     
+    <canvas width="750" height="750"></canvas>
+
     <div class="game-store">
-      <div id="pellet-tower" class="tower-wrapper"></div>
-      <div id="splash-tower" class="tower-wrapper"></div>
-      <div id="air-tower" class="tower-wrapper"></div>
-      <div id="ice-tower" class="tower-wrapper"></div>
-      <div id="earthquake-tower" class="tower-wrapper"></div>
-      <div id="machine-tower" class="tower-wrapper"></div>
+      <div id="pellet" class="tower-wrapper store-item"></div>
+      <div id="splash" class="tower-wrapper store-item"></div>
+      <div id="air" class="tower-wrapper store-item"></div>
+      <div id="ice" class="tower-wrapper store-item"></div>
+      <div id="earthquake" class="tower-wrapper store-item"></div>
+      <div id="machine" class="tower-wrapper store-item"></div>
     </div>
     <script src="script.js" async defer type="module"></script>
   </body>

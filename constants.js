@@ -10,9 +10,11 @@ export const constants = {
 
   MAP_SIZE: 500,
 
-  START_MONEY: 10000,
+  START_MONEY: 0, //10000
 
   GRID_DIMS: 20,
+
+  NODE_SIZE: 500 / 20,
 
   START_POS: {
     col: 0,

@@ -9,15 +9,18 @@ import { Game } from "./game.js";
 const { 
   FPS, 
   NODE_COLORS,
+  TOWER_STATS,
   TOWER_COLORS, 
   GRID_DIMS, 
   ENEMY_SIZE, 
-  TOWER_SIZE_OFFSET 
+  TOWER_SIZE_OFFSET,
+  MAP_SIZE,
+  NODE_SIZE
 } = constants
 
 let lastRenderTime = 0;
 
-// document elements
+// spawn enemy test button
 let spawnBtn = document.getElementById('spawn-btn');
 let a = false;
 spawnBtn.addEventListener("click", function() {
@@ -31,69 +34,121 @@ spawnBtn.addEventListener("click", function() {
   }
 });
 
-// document elements
-let buildBtn = document.getElementById('build-btn');
-buildBtn.addEventListener("click", function() {
-  game.buildTower('pellet', 10, 10, 'easy')
+
+
+
+////////////////////
+//// GAME STATS ////
+////////////////////
+
+
+let lives = document.getElementById('lives');
+let money = document.getElementById('money');
+let level = document.getElementById('level');
+let addMoney = document.getElementById('money-btn');
+addMoney.addEventListener('click', () => {
+  game.stats.money = game.stats.money + 1000;
 });
 
 
-let pelletStore = document.getElementById('pellet-tower');
-let splashStore = document.getElementById('splash-tower');
-let airStore = document.getElementById('air-tower');
-let iceStore = document.getElementById('ice-tower');
-let earthquakeStore = document.getElementById('earthquake-tower');
-let machineStore = document.getElementById('machine-tower');
 
-pelletStore.addEventListener('click', onMouseClick);
-splashStore.addEventListener('click', onMouseClick);
-airStore.addEventListener('click', onMouseClick);
-iceStore.addEventListener('click', onMouseClick);
-earthquakeStore.addEventListener('click', onMouseClick);
-machineStore.addEventListener('click', onMouseClick);
+/////////////////////
+//// TOWER STORE ////
+/////////////////////
 
 
 
+const towerStore = [...document.getElementsByClassName('store-item')];
 
+// determine if user is currently placing a tower
+let placingTower = false;
+let mousePos = { x: 0, y:0 };
+let draggingTower = '';
+
+// tower selection logic
 function onMouseClick(event) {
-  // game.pickTower(event.target.id);
+
+  placingTower = true;
+
+  // create tower drag image when user wants to place a tower
   let dragObject = document.createElement('div');
   dragObject.className = 'mouse-drag-object';
-  dragObject.id = `${event.target.id}`
+  dragObject.id = `${event.target.id}`;
+  draggingTower = dragObject.id.toString();
+
+  // some rendering offset to have the mouse in the middle of the tower
   dragObject.style.left = event.pageX - TOWER_SIZE_OFFSET + 'px';
   dragObject.style.top = event.pageY - TOWER_SIZE_OFFSET + 'px';
 
-  // draw the tower being dragged by the user
+  // event listener to have tower follow mouse points
   document.addEventListener('mousemove', e => onMouseMove(e, dragObject));
+
+  // event listener for tower placement
   document.addEventListener('mouseup', e => onMouseUp(e, dragObject), false);
+
+  // draw tower to screen
   document.querySelector('body').appendChild(dragObject);
 }
 
+
+
+// set tower x, y position to the mouse
 function onMouseMove(e, dragObject) {
   dragObject.style.left = e.pageX - TOWER_SIZE_OFFSET + 'px';
   dragObject.style.top = e.pageY - TOWER_SIZE_OFFSET + 'px';
+  getMousePos(e);
 }
 
+
+function mouseInCanvas(mousePos) {
+  let { x, y } = mousePos;
+  return (x < MAP_SIZE && x > 0 && y < MAP_SIZE && y > 0)
+}
+
+
+// TOWER PLACEMENT LOGIC
 function onMouseUp(e, dragObject) {
-  console.log('mouseup')
+
+  placingTower = false;
   
+  // remove draggable tower from screen
   document.querySelector('body').removeChild(dragObject);
+
+  // remove the mouse event listeners
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', this);
-  let type = e.target.id.toString();
-  type = type.split('-')[0];
-  let { x, y } = getMousePos(e);
-  game.buildTower(type, x, y, difficulty);
+
+  // get mouse position relative to canvas boundary
+  getMousePos(e);
+  let { x, y } = mousePos;
+
+  // if mouse is inside canvas, then place the tower
+  if (mouseInCanvas(mousePos)) {
+
+    // build tower 
+    let type = e.target.id.toString();
+    game.buildTower(type, x, y, difficulty);
+
+  } else { console.log('tower placed outside') }
 };
 
+// get mouse position relative to the canvas
 function getMousePos(evt) {
   var rect = document.querySelector('canvas').getBoundingClientRect();
-  console.log(evt.clientX)
-  return {
+  mousePos = {
     x: evt.clientX - rect.left - 10,
     y: evt.clientY - rect.top - 10
   };
 }
+
+
+
+
+
+
+/////////////////////////
+//// MAIN GAME LOGIC ////
+/////////////////////////
 
 // game difficulty, move somewhere so it can be set manually
 let difficulty = 'easy'
@@ -111,10 +166,6 @@ const controller = new Controller();
 display.buffer.canvas.height = game.map.width;
 display.buffer.canvas.width = game.map.height;
 display.buffer.imageSmoothingEnabled = false;
-
-const nodeWidth = game.map.width / GRID_DIMS;
-const nodeHeight = game.map.height / GRID_DIMS;
-
 
 // GAME LOOP
 function main(currentTime) {
@@ -135,11 +186,60 @@ function main(currentTime) {
 window.requestAnimationFrame(main);
 
 
-// main update and render functions
+
+//////////////////////////
+//// UPDATE FUNCTIONS ////
+//////////////////////////
+
+// MAIN UPDATE FUNCTION
 function update() {
+
+  // update game
   game.update();
+
+  // toggle tower clickable depending on the user's money
+  updateTowerStore();
+
+  // update lives and money based on game stats 
+  lives.innerHTML = game.stats.lives.toString();
+  money.innerHTML = game.stats.money.toString();
+  level.innerHTML = game.stats.level.toString();
 }
 
+// check if a tower is purchaseable by the player 
+function updateTowerStore() {
+
+  towerStore.filter(towerItem => {
+
+    // if player doesn't have enough money then remove event listener
+    if(TOWER_STATS[towerItem.id.toString()][difficulty].cost[0] < game.stats.money) {
+      towerItem.addEventListener('click', onMouseClick);
+      towerItem.style.opacity = 1;
+    } else {
+      towerItem.removeEventListener('click', onMouseClick);
+      towerItem.style.opacity = .5;
+    }
+  })
+  
+// pelletStore.addEventListener('click', onMouseClick);
+// splashStore.addEventListener('click', onMouseClick);
+// airStore.addEventListener('click', onMouseClick);
+// iceStore.addEventListener('click', onMouseClick);
+// earthquakeStore.addEventListener('click', onMouseClick);
+// machineStore.addEventListener('click', onMouseClick);
+
+}
+
+
+
+
+
+///////////////////////////
+//// DRAWING FUNCTIONS ////
+///////////////////////////
+
+
+// MAIN DRAW FUNCTION
 function draw() {
 
   // draw game background
@@ -150,6 +250,11 @@ function draw() {
 
   // draw everything else
   drawOutsideElements();
+
+  // draw potential tower if player is dragging a tower
+  if (placingTower && mouseInCanvas(mousePos)) {
+    drawNewTower();
+  };
 
   // display buffer
   display.draw(); 
@@ -176,36 +281,34 @@ function drawMap() {
     // draw tower node
     if (node.type === 'tower') {
       display.drawRectangle(
-        node.col * nodeWidth,
-        node.row * nodeHeight, 
-        nodeWidth, 
-        nodeHeight, 
+        node.col * NODE_SIZE,
+        node.row * NODE_SIZE, 
+        NODE_SIZE, 
+        NODE_SIZE, 
         TOWER_COLORS[node.tower.type],
         1
       );
 
-      display.drawCircle(
-        node.col * nodeWidth + nodeWidth / 2,
-        node.row * nodeHeight + nodeHeight / 2,
-        node.tower.range[node.tower.level] * (nodeHeight / 2),
-        'rgba(100, 100, 100, ',
-        .1,
-      );
+      // ONLY DRAW IF TOWER IS CLICKED maybe write an isClicked() in tower
+      // display.drawCircle(
+      //   node.col * NODE_SIZE + NODE_SIZE / 2,
+      //   node.row * NODE_SIZE + NODE_SIZE / 2,
+      //   node.tower.range[node.tower.level - 1] * (NODE_SIZE / 2),
+      //   'rgba(100, 100, 100, ',
+      //   .1,
+      // );
 
     // draw start and end node
     } else {
       display.drawRectangle(
-        node.col * nodeWidth,
-        node.row * nodeHeight, 
-        nodeWidth, 
-        nodeHeight, 
+        node.col * NODE_SIZE,
+        node.row * NODE_SIZE, 
+        NODE_SIZE, 
+        NODE_SIZE, 
         NODE_COLORS[node.type],
         1
       );
     }
-    
-
-    
   });
 
   enemies.map(enemy => {
@@ -219,4 +322,31 @@ function drawMap() {
       1, // find a better way to animate health and death
     )
   });
+}
+
+function drawNewTower() {
+
+  // get tower position and range
+  let { x, y } = mousePos;
+  let col = Math.floor(x / NODE_SIZE) * NODE_SIZE;
+  let row = Math.floor(y / NODE_SIZE) * NODE_SIZE;
+  let range = TOWER_STATS[draggingTower][difficulty].range[0] * (NODE_SIZE / 2);
+
+  // draw tower
+  display.drawRectangle(
+    col,
+    row,
+    NODE_SIZE, 
+    NODE_SIZE, 
+    'gray'
+  );
+
+  // draw tower range
+  display.drawCircle(
+    col + NODE_SIZE / 2, 
+    row + NODE_SIZE / 2,
+    range,
+    'rgba(100, 100, 100, ',
+    .1,
+  );
 }

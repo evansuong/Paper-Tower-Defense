@@ -16,6 +16,11 @@ canvas {
   border-style: solid;
 }
 
+.btn-panel {
+  display: flex;
+  flex-direction: column;
+}
+
 .game-board {
   border-color: black;
   border-width: 10px;
@@ -29,6 +34,7 @@ canvas {
   border-color: aquamarine;
   border-width: 10px;
   border-style: solid;
+  background-color: black;
 }
 
 .tower-wrapper {
@@ -40,7 +46,7 @@ canvas {
   background-color: gray;
 }
 
-#pellet-tower {
+#pellet {
   background-color: black;
 }
 
@@ -48,7 +54,7 @@ canvas {
   background-color: black;
 }
 
-#splash-tower {
+#splash {
   background-color: blue;
 }
 
@@ -56,7 +62,7 @@ canvas {
   background-color: blue;
 }
 
-#air-tower {
+#air {
   background-color: yellow;
 }
 
@@ -64,7 +70,7 @@ canvas {
   background-color: yellow;
 }
 
-#ice-tower {
+#ice {
   background-color: cyan;
 }
 
@@ -72,7 +78,7 @@ canvas {
   background-color: cyan;
 }
 
-#earthquake-tower {
+#earthquake {
  background-color: burlywood;
 }
 
@@ -80,7 +86,7 @@ canvas {
   background-color: burlywood;
 }
 
-#machine-tower {
+#machine {
   background-color: slategrey;
 }
 
@@ -92,6 +98,7 @@ canvas {
   width: 30px;
   height: 30px;
   position: absolute;
+  opacity: .75;
 }
 
 

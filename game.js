@@ -12,6 +12,7 @@ export function Game(difficulty) {
     nodeSize: MAP_SIZE / GRID_DIMS,
     grid: new Grid(GRID_DIMS, difficulty),
   };
+  
   this.stats = {
     lives: LIVES[difficulty],
     money: START_MONEY,
@@ -19,6 +20,7 @@ export function Game(difficulty) {
     difficulty: difficulty,
   };
 }
+
 
 Game.prototype.update = function() {
 
@@ -96,6 +98,9 @@ Game.prototype.createEnemy = function(enemyType) {
 
 Game.prototype.buildTower = function(towerType, x, y, difficulty) {
 
+  // subtract tower cost from player money
+  // this.stats.money = this.stats.money - TOWER_STATS[towerType][difficulty].cost[0];
+
   // get grid row and column 
   let col = Math.floor(x / this.map.nodeSize);
   let row = Math.floor(y / this.map.nodeSize);
@@ -112,7 +117,7 @@ Game.prototype.buildTower = function(towerType, x, y, difficulty) {
   // reset enemy search 
   this.map.enemies.forEach(enemy => {
     enemy.findPath();
-  })
+  });  
 }
 
 Game.prototype.sellTower = function() {
