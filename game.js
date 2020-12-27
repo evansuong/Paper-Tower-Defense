@@ -19,10 +19,24 @@ export function Game(difficulty) {
     level: 0,
     difficulty: difficulty,
   };
+
+  this.roundStarted = false;
 }
 
 
 Game.prototype.update = function() {
+
+  // check if game over
+  if (this.stats.lives <= 0) {
+    console.log('game over');
+    // onGameOver();
+  }
+
+  // check if round is over
+  if (this.map.enemies.length <= 0 && this.roundStarted) {
+    this.roundStarted = false;
+    console.log('round over')
+  }
 
   // update enemy 
   this.map.enemies.forEach(enemy => {
@@ -72,7 +86,7 @@ Game.prototype.getEnemiesInRange = function(tower) {
 Game.prototype.startNextLevel = function() {
   this.stats.level++;
   let level = this.levels.getLevel(this.stats.level, this.stats.difficulty);
-  // for 
+  this.roundStarted = true;
 }
 
 Game.prototype.createEnemy = function(enemyType) {
@@ -128,9 +142,9 @@ Game.prototype.onEnemyReachedEnd = function(index) {
 
   // filter out the enemy that reached end
   this.map.enemies = this.map.enemies.filter(enemy => enemy.index !== index);
-  console.log('enemy', index, 'reached end');
 
   // decrement life counter
+  this.stats.lives = this.stats.lives - 1;
 }
 
 Game.prototype.onEnemyDeath = function(index) {

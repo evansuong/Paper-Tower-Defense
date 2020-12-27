@@ -312,7 +312,6 @@ function drawMap() {
   });
 
   enemies.map(enemy => {
-    console.log(enemy.currentHealth)
     display.drawCircle(
       enemy.x,
       enemy.y,
