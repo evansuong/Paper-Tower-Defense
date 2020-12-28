@@ -10,11 +10,10 @@ const {
   FPS, 
   NODE_COLORS,
   TOWER_STATS,
-  TOWER_COLORS, 
+  TOWER_COLORS,
+  TOWER_STAT_LABELS, 
   GRID_DIMS, 
   ENEMY_SIZE, 
-  TOWER_SIZE_OFFSET,
-  MAP_SIZE,
   NODE_SIZE
 } = constants
 
@@ -37,9 +36,9 @@ spawnBtn.addEventListener("click", function() {
 
 
 
-////////////////////
-//// GAME STATS ////
-////////////////////
+////////////////////////////
+////     GAME STATS     ////
+////////////////////////////
 
 
 let lives = document.getElementById('lives');
@@ -52,36 +51,38 @@ addMoney.addEventListener('click', () => {
 
 
 
-/////////////////////
-//// TOWER STORE ////
-/////////////////////
 
 
 
-const towerStore = [...document.getElementsByClassName('store-item')];
+//////////////////////////////
+////     TOWER BUTTONS    ////
+//////////////////////////////
 
-// determine if user is currently placing a tower
-let placingTower = false;
-let mousePos = { x: 0, y:0 };
-let draggingTower = '';
+let upgradeBtn = document.getElementById('upgrade-btn')
+let sellBtn = document.getElementById('sell-btn')
+
+// allow tower to be upgraded and sold
+upgradeBtn.addEventListener('click', () => onUpgradeBtnClick());
+sellBtn.addEventListener('click', () => onSellBtnClick());
+
+
+
+
+
+/////////////////////////////
+////     TOWER STORE     ////
+/////////////////////////////
+
 
 // tower selection logic
-function onMouseClick(event) {
-
-  placingTower = true;
+function onStoreMouseClick(e) {
 
   // create tower drag image when user wants to place a tower
   let dragObject = document.createElement('div');
-  dragObject.className = 'mouse-drag-object';
-  dragObject.id = `${event.target.id}`;
-  draggingTower = dragObject.id.toString();
-
-  // some rendering offset to have the mouse in the middle of the tower
-  dragObject.style.left = event.pageX - TOWER_SIZE_OFFSET + 'px';
-  dragObject.style.top = event.pageY - TOWER_SIZE_OFFSET + 'px';
+  controller.onMouseClick(e, dragObject);
 
   // event listener to have tower follow mouse points
-  document.addEventListener('mousemove', e => onMouseMove(e, dragObject));
+  document.addEventListener('mousemove', e => onMouseMove(e));
 
   // event listener for tower placement
   document.addEventListener('mouseup', e => onMouseUp(e, dragObject), false);
@@ -90,55 +91,123 @@ function onMouseClick(event) {
   document.querySelector('body').appendChild(dragObject);
 }
 
-
-
 // set tower x, y position to the mouse
-function onMouseMove(e, dragObject) {
-  dragObject.style.left = e.pageX - TOWER_SIZE_OFFSET + 'px';
-  dragObject.style.top = e.pageY - TOWER_SIZE_OFFSET + 'px';
-  getMousePos(e);
+function onMouseMove(e) {
+  controller.onMouseMove(e);
 }
-
-
-function mouseInCanvas(mousePos) {
-  let { x, y } = mousePos;
-  return (x < MAP_SIZE && x > 0 && y < MAP_SIZE && y > 0)
-}
-
 
 // TOWER PLACEMENT LOGIC
-function onMouseUp(e, dragObject) {
-
-  placingTower = false;
-  
+function onMouseUp(e) {
+ 
   // remove draggable tower from screen
-  document.querySelector('body').removeChild(dragObject);
+  document.querySelector('body').removeChild(controller.getDragObject());
 
   // remove the mouse event listeners
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', this);
 
-  // get mouse position relative to canvas boundary
-  getMousePos(e);
-  let { x, y } = mousePos;
-
   // if mouse is inside canvas, then place the tower
-  if (mouseInCanvas(mousePos)) {
+  if (controller.isMouseInCanvas()) {
 
+    let { x, y } = controller.getMousePos();
+  
     // build tower 
-    let type = e.target.id.toString();
+    let type = controller.dragObject.id.toString();
     game.buildTower(type, x, y, difficulty);
 
   } else { console.log('tower placed outside') }
+
+  // call controller onmouseup
+  controller.onMouseUp(e);
+  
 };
 
-// get mouse position relative to the canvas
-function getMousePos(evt) {
-  var rect = document.querySelector('canvas').getBoundingClientRect();
-  mousePos = {
-    x: evt.clientX - rect.left - 10,
-    y: evt.clientY - rect.top - 10
-  };
+
+
+
+/////////////////////////////////
+////     TOWER SELECTION     ////
+/////////////////////////////////
+
+document.querySelector('canvas').addEventListener('mousedown', onCanvasMouseDown);
+
+function onCanvasMouseDown(e) {
+
+  // deselect any tower already selected
+  game.deselectTower();
+
+  // call controller mouse down function
+  controller.onMouseDown(e);
+
+  // get mouse position
+  let { x, y } = controller.getMousePos();
+
+  // get node at mouse position
+  const towerStats = game.selectTower(x, y);
+
+  // if node is a tower, then set that node to be selected
+  if(towerStats) {
+
+    // set stat fields to selected tower
+    setTowerStatFields(towerStats);    
+
+    
+  } else {
+
+    // if node is not a tower, deselect any selected nodes 
+    game.deselectTower();
+
+    // reset stat panel
+    setTowerStatFields();
+  }
+}
+
+// TODO: make upgrade unclickable if the player doesn't have enough money
+function onUpgradeBtnClick() {
+  game.upgradeTower(); 
+  
+  // figure out how to add towerstats into here TODO: fix that
+  let upgradeStats = game.selectTower(towerStats.col * NODE_SIZE, towerStats.row * NODE_SIZE);
+  setTowerStatFields(upgradeStats);
+}
+
+function onSellBtnClick() {
+  game.sellTower();
+  game.deselectTower();
+  setTowerStatFields();
+}
+
+
+
+/////////////////////////////
+////     TOWER STORE     ////
+/////////////////////////////
+
+
+const towerStore = [...document.getElementsByClassName('store-item')];
+
+
+// check if a tower is purchaseable by the player 
+function updateTowerStore() {
+
+  towerStore.forEach(towerItem => {
+
+    // if player doesn't have enough money then remove event listener
+    if(TOWER_STATS[towerItem.id.toString()][difficulty].purchaseCost < game.stats.money) {
+      towerItem.addEventListener('click', onStoreMouseClick);
+      towerItem.style.opacity = 1;
+    } else {
+      towerItem.removeEventListener('click', onStoreMouseClick);
+      towerItem.style.opacity = .5;
+    }
+  });
+}
+
+
+
+
+Function.prototype.stack = function() {
+  console.log('stack')
 }
 
 
@@ -146,9 +215,44 @@ function getMousePos(evt) {
 
 
 
-/////////////////////////
-//// MAIN GAME LOGIC ////
-/////////////////////////
+
+
+/////////////////////////////
+////     TOWER STATS     ////
+/////////////////////////////
+
+const towerStatFields = [...document.getElementsByClassName('tower-stat')];
+
+// set tower stat fields when a tower is selected
+function setTowerStatFields(towerStats) {
+
+  if (towerStats) {
+    // set each stat field with selected tower
+    towerStatFields.forEach((statField, index) => {
+      let stat = statField.id.toString();
+      statField.innerHTML = TOWER_STAT_LABELS[stat] + towerStats[stat].toString();
+    });
+  } else {
+    // set each stat field with selected tower
+    towerStatFields.forEach((statField, index) => {
+      statField.innerHTML = '';
+    });
+  }
+ 
+}
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////////
+////     MAIN GAME LOGIC     ////
+/////////////////////////////////
 
 // game difficulty, move somewhere so it can be set manually
 let difficulty = 'easy'
@@ -187,9 +291,13 @@ window.requestAnimationFrame(main);
 
 
 
-//////////////////////////
-//// UPDATE FUNCTIONS ////
-//////////////////////////
+
+
+//////////////////////////////////
+////     UPDATE FUNCTIONS     ////
+//////////////////////////////////
+
+
 
 // MAIN UPDATE FUNCTION
 function update() {
@@ -206,37 +314,15 @@ function update() {
   level.innerHTML = game.stats.level.toString();
 }
 
-// check if a tower is purchaseable by the player 
-function updateTowerStore() {
-
-  towerStore.filter(towerItem => {
-
-    // if player doesn't have enough money then remove event listener
-    if(TOWER_STATS[towerItem.id.toString()][difficulty].cost[0] < game.stats.money) {
-      towerItem.addEventListener('click', onMouseClick);
-      towerItem.style.opacity = 1;
-    } else {
-      towerItem.removeEventListener('click', onMouseClick);
-      towerItem.style.opacity = .5;
-    }
-  })
-  
-// pelletStore.addEventListener('click', onMouseClick);
-// splashStore.addEventListener('click', onMouseClick);
-// airStore.addEventListener('click', onMouseClick);
-// iceStore.addEventListener('click', onMouseClick);
-// earthquakeStore.addEventListener('click', onMouseClick);
-// machineStore.addEventListener('click', onMouseClick);
-
-}
+// TODO implement upgrade and sell functions then enemy money when they die
 
 
 
 
 
-///////////////////////////
-//// DRAWING FUNCTIONS ////
-///////////////////////////
+///////////////////////////////////
+////     DRAWING FUNCTIONS     ////
+///////////////////////////////////
 
 
 // MAIN DRAW FUNCTION
@@ -252,7 +338,7 @@ function draw() {
   drawOutsideElements();
 
   // draw potential tower if player is dragging a tower
-  if (placingTower && mouseInCanvas(mousePos)) {
+  if (controller.dragging && controller.isMouseInCanvas()) {
     drawNewTower();
   };
 
@@ -276,8 +362,6 @@ function drawMap() {
     // don't draw empty nodes
     if (node.type === 'empty') return;
 
-    // draw non empty nodes to the buffer
-
     // draw tower node
     if (node.type === 'tower') {
       display.drawRectangle(
@@ -289,15 +373,17 @@ function drawMap() {
         1
       );
 
-      // ONLY DRAW IF TOWER IS CLICKED maybe write an isClicked() in tower
-      // display.drawCircle(
-      //   node.col * NODE_SIZE + NODE_SIZE / 2,
-      //   node.row * NODE_SIZE + NODE_SIZE / 2,
-      //   node.tower.range[node.tower.level - 1] * (NODE_SIZE / 2),
-      //   'rgba(100, 100, 100, ',
-      //   .1,
-      // );
-
+      // draw tower range if it is clicked by player
+      if (node.isSelected()) {
+        display.drawCircle(
+          node.col * NODE_SIZE + (NODE_SIZE / 2),
+          node.row * NODE_SIZE + (NODE_SIZE / 2),
+          node.tower.range * NODE_SIZE,
+          'rgba(100, 100, 100, ',
+          .1,
+        );
+      }
+     
     // draw start and end node
     } else {
       display.drawRectangle(
@@ -311,6 +397,7 @@ function drawMap() {
     }
   });
 
+  // draw enemies to the map
   enemies.map(enemy => {
     display.drawCircle(
       enemy.x,
@@ -323,13 +410,16 @@ function drawMap() {
   });
 }
 
+
+// draw potential tower placement
 function drawNewTower() {
 
   // get tower position and range
-  let { x, y } = mousePos;
+  let { x, y } = controller.getMousePos();
   let col = Math.floor(x / NODE_SIZE) * NODE_SIZE;
   let row = Math.floor(y / NODE_SIZE) * NODE_SIZE;
-  let range = TOWER_STATS[draggingTower][difficulty].range[0] * (NODE_SIZE / 2);
+  let draggingTower = controller.getDragObject().id.toString();
+  let range = TOWER_STATS[draggingTower][difficulty].range[0] * NODE_SIZE;
 
   // draw tower
   display.drawRectangle(

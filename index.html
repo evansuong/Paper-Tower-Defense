@@ -24,14 +24,29 @@
     
     <canvas width="750" height="750"></canvas>
 
-    <div class="game-store">
-      <div id="pellet" class="tower-wrapper store-item"></div>
-      <div id="splash" class="tower-wrapper store-item"></div>
-      <div id="air" class="tower-wrapper store-item"></div>
-      <div id="ice" class="tower-wrapper store-item"></div>
-      <div id="earthquake" class="tower-wrapper store-item"></div>
-      <div id="machine" class="tower-wrapper store-item"></div>
+    <div class="tower-panel">
+      <div class="game-store">
+        <div id="pellet" class="tower-wrapper store-item"></div>
+        <div id="splash" class="tower-wrapper store-item"></div>
+        <div id="air" class="tower-wrapper store-item"></div>
+        <div id="ice" class="tower-wrapper store-item"></div>
+        <div id="earthquake" class="tower-wrapper store-item"></div>
+        <div id="machine" class="tower-wrapper store-item"></div>
+      </div>
+      <div class="tower-stats">
+        <div id="type" class="tower-stat"></div>
+        <div id="level" class="tower-stat"></div>
+        <div id="damage" class="tower-stat"></div>
+        <div id="cost" class="tower-stat"></div>
+        <div id="range" class="tower-stat"></div>
+        <div id="reload" class="tower-stat"></div>
+        <div id="spread" class="tower-stat"></div>
+        <div id="sell" class="tower-stat"></div>
+        <button id="upgrade-btn">Upgrade</button>
+        <button id="sell-btn">Sell</button>
+      </div>
     </div>
+   
     <script src="script.js" async defer type="module"></script>
   </body>
 </html>

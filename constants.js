@@ -2,19 +2,13 @@
 
 export const constants = {
 
-  FPS: 24,
-
-  ENEMY_SIZE: 25,
-  
+  FPS:               24,
+  ENEMY_SIZE:        25,
   TOWER_SIZE_OFFSET: 15,
-
-  MAP_SIZE: 500,
-
-  START_MONEY: 0, //10000
-
-  GRID_DIMS: 20,
-
-  NODE_SIZE: 500 / 20,
+  MAP_SIZE:          500,
+  START_MONEY:       10000,  
+  GRID_DIMS:         20,
+  NODE_SIZE:         500 / 20,
 
   START_POS: {
     col: 0,
@@ -34,7 +28,7 @@ export const constants = {
 
   // enemy contains a base speed and base health that increase based on difficulty
   ENEMY_STATS: {
-    normal: buildEnemyObjects(1000, 2),
+    normal: buildEnemyObjects(20, 2),
     speed:  buildEnemyObjects(20, 5),
   },
 
@@ -44,14 +38,14 @@ export const constants = {
     speed:  'rgba(200, 150, 180, ',
   },
 
-  // tower stats are base damage, base cost, range, shots per second, shotspread in that order
+  // tower stats are base damage, base cost, range, shots per second, shotspread respectively
   TOWER_STATS: {
     pellet:     buildTowerObjects(1, 500, 3, 1, 1),
     splash:     buildTowerObjects(2, 1500, 2, 2, 2),
     air:        buildTowerObjects(3, 2000, 3, 2, 3),
-    ice:        buildTowerObjects(0, 2000, 1, 1, -1),
-    earthquake: buildTowerObjects(3, 3000, 3, 1, -1),
-    machine:    buildTowerObjects(3, 4000, 3, 5, -1),
+    ice:        buildTowerObjects(0, 2000, 1, 1, 10),
+    earthquake: buildTowerObjects(3, 3000, 3, 1, 10),
+    machine:    buildTowerObjects(3, 4000, 3, 24, 1),
   },
 
   // replace with image urls
@@ -62,6 +56,19 @@ export const constants = {
     earthquake: 'burlywood',
     ice:        'cyan',
     machine:    'slategray'
+  },
+
+  // tower stat labels for stat panel
+  TOWER_STAT_LABELS: {
+    type:   'type: ',
+    level:  'level: ',
+    damage: 'damage per shot: ',
+    // TODO: edit upgrade cost
+    cost:   'upgrade cost: ',
+    range:  'range: ',
+    reload: 'shots per second: ',
+    spread: 'shot spread: ',
+    sell:   'sell cost: ',
   },
 
   // replace with image urls
@@ -97,12 +104,16 @@ function buildTowerObjects(baseDamage, baseCost, baseRange, shotsPerSecond, shot
   }
 }
 
+
+// TODO: split cost into purchase price and upgrade cost
 function buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread) {
   return {
     damage:         [baseDamage, baseDamage + 2, baseDamage + 5, baseDamage + 10],
-    cost:           [baseCost,   baseCost + 100, baseCost + 500, baseCost + 1000],
+    purchaseCost:   baseCost,
+    upgradeCost:    [baseCost + 100, baseCost + 500, baseCost + 1000],
     range:          [baseRange,  baseRange + 1,  baseRange + 2,  baseRange + 3],
     shotsPerSecond: shotsPerSecond,
     shotSpread:     shotSpread,
+    sellCost:       [baseCost * .75, (baseCost + 100) * .75, (baseCost + 500)  * .75, (baseCost + 1000 * .75)]
   }
 }
