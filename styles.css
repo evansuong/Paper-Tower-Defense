@@ -1,18 +1,50 @@
 body {
   height: 100vh;
   width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin: 0;
   background-color: aliceblue;
 }
 
 canvas {
-  width: 500px;
-  height: 500px;
-  border-color: black;
-  border-width: 10px;
+  width: 600px;
+  height: 600px;
+  border-color: purple;
+  border-width: 5px;
+  border-style: solid;
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+}
+
+.game-stats {
+  display: flex;
+  flex-direction: column;
+  border-color: red;
+  border-width: 5px;
+  border-style: solid;
+}
+
+.numbers {
+  display: flex;
+  flex-direction: column;
+}
+
+#level-counter {
+  display: flex;
+  flex-direction: column;
+  border-color: blue;
+  border-width: 5px;
+  border-style: solid;
+}
+
+
+.game-board {
+  display: flex;
+  justify-content: center;
+  border-color: green;
+  border-width: 5px;
   border-style: solid;
 }
 
@@ -21,15 +53,26 @@ canvas {
   flex-direction: column;
 }
 
-.game-board {
-  border-color: black;
-  border-width: 10px;
-  border-style: solid;
-}
 
 .tower-panel {
   display: flex;
   flex-direction: column;
+}
+
+#pause-panel {
+  position: absolute;
+  z-index: 999;
+  background-color: black;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 300px;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  padding: 100px;
 }
 
 .game-store {
@@ -42,13 +85,11 @@ canvas {
   background-color: black;
 }
 
-.tower-stats {
+#tower-stat-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-color: black;
-  border-width: 10px;
-  border-style: solid;
+  background-color: rgba(0, 0, 0, .5);
 }
 
 .tower-wrapper {

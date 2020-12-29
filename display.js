@@ -2,8 +2,6 @@ import { constants } from "./constants.js";
 
 const { GRID_DIMS, ENEMY_SIZE } = constants;
 
-
-
 export function Display(canvas) {
   this.buffer  = document.createElement("canvas").getContext("2d"),
   this.context = canvas.getContext("2d");
@@ -13,29 +11,26 @@ export function Display(canvas) {
 
 
 // draws rectangles to the buffer
-Display.prototype.drawRectangle = function(x, y, width, height, color) {
-  this.buffer.fillStyle = color;
+Display.prototype.drawRectangle = function(x, y, width, height, color, transparency=1) {
+  if (transparency === 1) {
+    this.buffer.fillStyle = color;
+  } else {
+    let alpha = Math.sin(transparency) / 2 + .5;
+    this.buffer.fillStyle = color + `${alpha}` + ')';
+  }
   this.buffer.fillRect(x, y, width, height);
 };
 
 // draws rectangles to the buffer
-Display.prototype.drawCircle = function(x, y, radius, color, transparency) {
+Display.prototype.drawCircle = function(x, y, radius, color, transparency=1) {
   this.buffer.beginPath();
-  this.buffer.fillStyle = color + `${transparency}` + ')';
+  if (transparency === 1) {
+    this.buffer.fillStyle = color;
+  } else {
+    this.buffer.fillStyle = color + `${transparency}` + ')';
+  }
   this.buffer.arc(x, y, radius, 0, 2 * Math.PI);
   this.buffer.fill();
-};
-
-// draws rectangles to the buffer
-Display.prototype.drawEnemy = function(x, y, width, height, color) {
-  this.buffer.fillStyle = color;
-  this.buffer.fillRect(x, y, width, height);
-};
-
-// draws rectangles to the buffer
-Display.prototype.drawTower = function(x, y, width, height, color) {
-  this.buffer.fillStyle = color;
-  this.buffer.fillRect(x, y, width, height);
 };
 
 // draws background to the buffer

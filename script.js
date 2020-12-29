@@ -2,6 +2,7 @@ import { constants } from "./constants.js";
 import { Controller } from "./controller.js";
 import { Display } from "./display.js";
 import { Game } from "./game.js";
+import { PausePanel } from "./pausePanel.js";
 
 
 
@@ -12,58 +13,113 @@ const {
   TOWER_STATS,
   TOWER_COLORS,
   TOWER_STAT_LABELS, 
-  GRID_DIMS, 
+  SELECTED_COLOR, 
   ENEMY_SIZE, 
-  NODE_SIZE
+  ENEMY_COLORS,
+  MAP_SIZE,
+  NODE_SIZE,
+  HEALTHBAR
 } = constants
 
 let lastRenderTime = 0;
 
-// spawn enemy test button
-let spawnBtn = document.getElementById('spawn-btn');
-let a = false;
-spawnBtn.addEventListener("click", function() {
-  if (a) {
-    game.createEnemy('normal');
-    a = !a;
 
-  } else {
-    game.createEnemy('speed');
-    a = !a;
-  }
+
+
+///////////////////////////////
+////     HTML ELEMENTS     ////
+///////////////////////////////
+
+
+
+// PANEL BUTTONS
+let unpauseBtn = document.createElement('button');
+unpauseBtn.innerHTML = 'unpause';
+let restartBtn = document.createElement('button');
+restartBtn.innerHTML = 'restart game';
+let exitBtn = document.createElement('button');
+exitBtn.innerHTML = 'exit game';
+let easyBtn = document.createElement('button');
+easyBtn.innerHTML = 'easy';
+let mediumBtn = document.createElement('button');
+mediumBtn.innerHTML = 'medium';
+let hardBtn = document.createElement('button');
+hardBtn.innerHTML = 'hard';
+
+let upgradeBtn = document.getElementById('upgrade-btn');
+let sellBtn = document.getElementById('sell-btn');
+
+
+// GAME BUTTONS
+let pauseBtn = document.getElementById('pause-btn');
+let nextLevelBtn = document.getElementById('next-lvl-btn');
+
+
+// unpause game
+unpauseBtn.addEventListener('click', () => {
+  game.unpause();
+  pausePanel.hide();
 });
 
-
-
-
-////////////////////////////
-////     GAME STATS     ////
-////////////////////////////
-
-
-let lives = document.getElementById('lives');
-let money = document.getElementById('money');
-let level = document.getElementById('level');
-let addMoney = document.getElementById('money-btn');
-addMoney.addEventListener('click', () => {
-  game.stats.money = game.stats.money + 1000;
+// restart current game
+restartBtn.addEventListener('click', () => {
+  game.reset();
+  init(game.getDifficulty());
+  pausePanel.hide();
 });
 
+// go back to start panel
+exitBtn.addEventListener('click', () => {
+  console.log('resseting fame button')
+  game.reset();
+  pausePanel.setPanel('start');
+});
 
+// select easy mode
+easyBtn.addEventListener('click', () => {
+  init('easy');
+  pausePanel.hide();
+});
 
+// select medium mode
+mediumBtn.addEventListener('click', () => {
+  init('medium');
+  pausePanel.hide();
+});
 
+// select hard mode
+hardBtn.addEventListener('click', () => {
+  init('hard');
+  pausePanel.hide();
+})
 
+// pause game
+pauseBtn.addEventListener('click', () => {
+  game.pause();
+  pausePanel.setPanel('pause');
+  pausePanel.show();
+});
 
-//////////////////////////////
-////     TOWER BUTTONS    ////
-//////////////////////////////
-
-let upgradeBtn = document.getElementById('upgrade-btn')
-let sellBtn = document.getElementById('sell-btn')
+// start next level
+nextLevelBtn.addEventListener('click', () => {
+  game.startNextLevel();
+})
 
 // allow tower to be upgraded and sold
 upgradeBtn.addEventListener('click', () => onUpgradeBtnClick());
 sellBtn.addEventListener('click', () => onSellBtnClick());
+
+
+// GAME STAT LABELS
+let livesLabel = document.getElementById('lives');
+let moneyLabel = document.getElementById('money');
+let levelLabel = document.getElementById('level');
+let difficultyLabel = document.getElementById('difficulty');
+let currentLevelLabel = document.getElementById('current-level');
+let nextLevelLabel = document.getElementById('next-level');
+
+
+
 
 
 
@@ -72,6 +128,26 @@ sellBtn.addEventListener('click', () => onSellBtnClick());
 /////////////////////////////
 ////     TOWER STORE     ////
 /////////////////////////////
+
+
+const towerStore = [...document.getElementsByClassName('store-item')];
+
+
+// check if a tower is purchaseable by the player 
+function updateTowerStore() {
+
+  towerStore.forEach(towerItem => {
+
+    // if player doesn't have enough money then remove event listener
+    if(TOWER_STATS[towerItem.id.toString()][game.getDifficulty()].purchaseCost < game.stats.money) {
+      towerItem.addEventListener('click', onStoreMouseClick);
+      towerItem.style.opacity = 1;
+    } else {
+      towerItem.removeEventListener('click', onStoreMouseClick);
+      towerItem.style.opacity = .5;
+    }
+  });
+}
 
 
 // tower selection logic
@@ -113,7 +189,7 @@ function onMouseUp(e) {
   
     // build tower 
     let type = controller.dragObject.id.toString();
-    game.buildTower(type, x, y, difficulty);
+    game.buildTower(type, x, y, game.getDifficulty());
 
   } else { console.log('tower placed outside') }
 
@@ -121,6 +197,10 @@ function onMouseUp(e) {
   controller.onMouseUp(e);
   
 };
+
+
+
+
 
 
 
@@ -150,7 +230,6 @@ function onCanvasMouseDown(e) {
 
     // set stat fields to selected tower
     setTowerStatFields(towerStats);    
-
     
   } else {
 
@@ -164,10 +243,10 @@ function onCanvasMouseDown(e) {
 
 // TODO: make upgrade unclickable if the player doesn't have enough money
 function onUpgradeBtnClick() {
-  game.upgradeTower(); 
+  let upgradeStats = game.upgradeTower(); 
+  console.log(upgradeStats)
   
   // figure out how to add towerstats into here TODO: fix that
-  let upgradeStats = game.selectTower(towerStats.col * NODE_SIZE, towerStats.row * NODE_SIZE);
   setTowerStatFields(upgradeStats);
 }
 
@@ -178,37 +257,6 @@ function onSellBtnClick() {
 }
 
 
-
-/////////////////////////////
-////     TOWER STORE     ////
-/////////////////////////////
-
-
-const towerStore = [...document.getElementsByClassName('store-item')];
-
-
-// check if a tower is purchaseable by the player 
-function updateTowerStore() {
-
-  towerStore.forEach(towerItem => {
-
-    // if player doesn't have enough money then remove event listener
-    if(TOWER_STATS[towerItem.id.toString()][difficulty].purchaseCost < game.stats.money) {
-      towerItem.addEventListener('click', onStoreMouseClick);
-      towerItem.style.opacity = 1;
-    } else {
-      towerItem.removeEventListener('click', onStoreMouseClick);
-      towerItem.style.opacity = .5;
-    }
-  });
-}
-
-
-
-
-Function.prototype.stack = function() {
-  console.log('stack')
-}
 
 
 
@@ -232,13 +280,16 @@ function setTowerStatFields(towerStats) {
       let stat = statField.id.toString();
       statField.innerHTML = TOWER_STAT_LABELS[stat] + towerStats[stat].toString();
     });
+    document.getElementById('tower-stat-wrapper').style.display = 'flex';
+
   } else {
     // set each stat field with selected tower
     towerStatFields.forEach((statField, index) => {
       statField.innerHTML = '';
     });
+    document.getElementById('tower-stat-wrapper').style.display = 'none';
+      
   }
- 
 }
 
 
@@ -254,22 +305,74 @@ function setTowerStatFields(towerStats) {
 ////     MAIN GAME LOGIC     ////
 /////////////////////////////////
 
-// game difficulty, move somewhere so it can be set manually
-let difficulty = 'easy'
 
-// Object initialization
+
+// game difficulty, move somewhere so it can be set manually
+
+// flashing color for selected towers
+let flashingTransparency = 0;
+
+
+
+// PANEL ELEMENTS OBJECT
+const panelElements = {
+  win: [
+    restartBtn,
+    exitBtn,
+  ],
+  lose: [
+    restartBtn,
+    exitBtn,
+  ],
+  pause: [
+    unpauseBtn,
+    restartBtn,
+    exitBtn,
+  ],
+  start: [
+    easyBtn,
+    mediumBtn,
+    hardBtn,
+  ],
+}
+
+
+// Start/Pause Panel
+const pausePanel = new PausePanel(document.getElementById('pause-panel'), panelElements);
+pausePanel.setPanel('start');
+pausePanel.show();
+
 
 // Model
-const game = new Game(difficulty);
+let game = {};
 // View
 const display = new Display(document.querySelector('canvas'));
 // Controller
 const controller = new Controller();
 
+  
 // set the internal canvas width and height 
-display.buffer.canvas.height = game.map.width;
-display.buffer.canvas.width = game.map.height;
+display.buffer.canvas.height = MAP_SIZE;
+display.buffer.canvas.width = MAP_SIZE;
 display.buffer.imageSmoothingEnabled = false;
+
+
+// initialize game once difficulty is set
+function init(difficulty) {
+
+  // set stat fields
+  setTowerStatFields();
+
+  // Model
+  game = new Game(difficulty);
+  
+  // update all game pieces
+  update();
+  // draw all updated piecesw
+  draw();
+
+}
+
 
 // GAME LOOP
 function main(currentTime) {
@@ -281,10 +384,21 @@ function main(currentTime) {
 
   lastRenderTime = currentTime;
 
-  // update all game pieces
-  update();
-  // draw all updated piecesw
-  draw();
+  console.log(game.gameOver)
+  if(game.gameOver) {
+    if(game.win) {
+      if (pausePanel.getPanel() !== 'win') pausePanel.setPanel('win');
+    } else {
+      if (pausePanel.getPanel() !== 'lose') pausePanel.setPanel('lose');
+    }
+  }
+
+  if(game.running) {
+    // update all game pieces
+    update();
+    // draw all updated piecesw
+    draw();
+  } 
 }
 
 window.requestAnimationFrame(main);
@@ -308,13 +422,20 @@ function update() {
   // toggle tower clickable depending on the user's money
   updateTowerStore();
 
-  // update lives and money based on game stats 
-  lives.innerHTML = game.stats.lives.toString();
-  money.innerHTML = game.stats.money.toString();
-  level.innerHTML = game.stats.level.toString();
-}
+  let { type, levels, lives, money, level, difficulty } = game.getLevelStats();
 
-// TODO implement upgrade and sell functions then enemy money when they die
+  // update lives and money based on game stats 
+  livesLabel.innerHTML = '<3 ' + lives;
+  moneyLabel.innerHTML = '$' + money;
+  levelLabel.innerHTML = 'level: ' + level; 
+  difficultyLabel.innerHTML = 'difficulty: ' + difficulty;
+  currentLevelLabel.innerHTML = type;
+  if (levels.length > 1) nextLevelLabel.innerHTML = levels[1].enemyType;
+  else nextLevelLabel.style.display = 'none';
+
+  // increase flashing transparency
+  flashingTransparency = flashingTransparency + .2;
+}
 
 
 
@@ -334,9 +455,6 @@ function draw() {
   // draw game map
   drawMap();
 
-  // draw everything else
-  drawOutsideElements();
-
   // draw potential tower if player is dragging a tower
   if (controller.dragging && controller.isMouseInCanvas()) {
     drawNewTower();
@@ -347,10 +465,6 @@ function draw() {
 }
 
 
-// draw elements outside of the map
-function drawOutsideElements() {
-
-}
 
 
 // draw all the entities on the map
@@ -380,9 +494,17 @@ function drawMap() {
           node.row * NODE_SIZE + (NODE_SIZE / 2),
           node.tower.range * NODE_SIZE,
           'rgba(100, 100, 100, ',
-          .1,
+          .2,
         );
-      }
+        display.drawRectangle(
+          node.col * NODE_SIZE,
+          node.row * NODE_SIZE,
+          NODE_SIZE,
+          NODE_SIZE,
+          SELECTED_COLOR,
+          flashingTransparency,
+        )
+      } 
      
     // draw start and end node
     } else {
@@ -407,6 +529,24 @@ function drawMap() {
       // enemy.currentHealth / (enemy.startingHealth / 3),
       1, // find a better way to animate health and death
     )
+
+    // draw enemy health bar
+    display.drawRectangle(
+      enemy.x - (HEALTHBAR.width / 2),
+      enemy.y - (ENEMY_SIZE / 1.5),
+      HEALTHBAR.width,
+      HEALTHBAR.height,
+      HEALTHBAR.color1,
+    )
+
+    // draw enemy health in health bar
+    display.drawRectangle(
+      enemy.x - (HEALTHBAR.width / 2),
+      enemy.y - (ENEMY_SIZE / 1.5),
+      HEALTHBAR.width * (enemy.currentHealth / enemy.startingHealth),
+      HEALTHBAR.height,
+      HEALTHBAR.color2,
+    )
   });
 }
 
@@ -419,7 +559,7 @@ function drawNewTower() {
   let col = Math.floor(x / NODE_SIZE) * NODE_SIZE;
   let row = Math.floor(y / NODE_SIZE) * NODE_SIZE;
   let draggingTower = controller.getDragObject().id.toString();
-  let range = TOWER_STATS[draggingTower][difficulty].range[0] * NODE_SIZE;
+  let range = TOWER_STATS[draggingTower]['easy'].range[0] * NODE_SIZE;
 
   // draw tower
   display.drawRectangle(
@@ -436,6 +576,6 @@ function drawNewTower() {
     row + NODE_SIZE / 2,
     range,
     'rgba(100, 100, 100, ',
-    .1,
+    .2,
   );
 }

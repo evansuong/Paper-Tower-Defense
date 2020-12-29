@@ -48,8 +48,8 @@ Controller.prototype.isMouseInCanvas = function() {
 Controller.prototype.setMousePos = function(e) {
   var rect = document.querySelector('canvas').getBoundingClientRect();
   this.mousePos = {
-    x: e.clientX - rect.left - 10,
-    y: e.clientY - rect.top - 10
+    x: e.clientX - rect.left - 5,
+    y: e.clientY - rect.top - 5
   };
 }
 

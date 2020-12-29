@@ -10,41 +10,63 @@
     <title>Paper Defense</title> 
   </head>
   <body> 
-    <div class="game-stats">
-      <p id="lives"></p>
-      <p id="money"></p>
-      <p id="level"></p>
-    </div>
-    <div class="btn-panel">
-      <button id="spawn-btn">Spawn</button>
-      <button id="next-lvl-btn">Next Level</button>
-      <button id="restart-btn">Restart</button>
-      <button id="money-btn">Add money</button>
-    </div>
-    
-    <canvas width="750" height="750"></canvas>
+    <div class="game">
+      <div class="title">Paper Defense</div>
+      <div id="pause-panel"></div>
 
-    <div class="tower-panel">
-      <div class="game-store">
-        <div id="pellet" class="tower-wrapper store-item"></div>
-        <div id="splash" class="tower-wrapper store-item"></div>
-        <div id="air" class="tower-wrapper store-item"></div>
-        <div id="ice" class="tower-wrapper store-item"></div>
-        <div id="earthquake" class="tower-wrapper store-item"></div>
-        <div id="machine" class="tower-wrapper store-item"></div>
+      
+      <div class="game-board">
+
+        <div class="game-stats">
+          <div id="lives"></div>
+          <div id="money"></div>
+          <div id="level"></div>
+          <div id="difficulty"></div>
+          <div>Current Level:</div>
+          <div id="current-level"></div>
+          <div>Next Level:</div>
+          <div id="next-level"></div>
+        </div>
+
+        <canvas width="750" height="750"></canvas>
+
+        <div class="tower-panel">
+
+          <div class="game-store">
+            <div id="pellet" class="tower-wrapper store-item"></div>
+            <div id="splash" class="tower-wrapper store-item"></div>
+            <div id="air" class="tower-wrapper store-item"></div>
+            <div id="ice" class="tower-wrapper store-item"></div>
+            <div id="earthquake" class="tower-wrapper store-item"></div>
+            <div id="machine" class="tower-wrapper store-item"></div>
+          </div>
+
+          <div id="tower-stat-wrapper">
+
+            <div id="type" class="tower-stat"></div>
+            <div id="level" class="tower-stat"></div>
+            <div id="damage" class="tower-stat"></div>
+            <div id="cost" class="tower-stat"></div>
+            <div id="range" class="tower-stat"></div>
+            <div id="reload" class="tower-stat"></div>
+            <div id="spread" class="tower-stat"></div>
+            <div id="sell" class="tower-stat"></div>
+            <div id="upgrade-btn" class="tower-btn">upgrade</div>
+            <div id="sell-btn" class="tower-btn">sell</div>
+
+          </div>
+        </div>
       </div>
-      <div class="tower-stats">
-        <div id="type" class="tower-stat"></div>
-        <div id="level" class="tower-stat"></div>
-        <div id="damage" class="tower-stat"></div>
-        <div id="cost" class="tower-stat"></div>
-        <div id="range" class="tower-stat"></div>
-        <div id="reload" class="tower-stat"></div>
-        <div id="spread" class="tower-stat"></div>
-        <div id="sell" class="tower-stat"></div>
-        <button id="upgrade-btn">Upgrade</button>
-        <button id="sell-btn">Sell</button>
-      </div>
+    </div>
+
+
+    <!-- <div id="win-panel">
+      <button id="restart-btn">Restart</button>
+    </div> -->
+    
+    <div class="btn-panel">
+      <button id="next-lvl-btn">Start Level</button>
+      <button id="pause-btn">Pause</button>
     </div>
    
     <script src="script.js" async defer type="module"></script>
