@@ -15,7 +15,7 @@ const {
   TOWER_STAT_LABELS, 
   SELECTED_COLOR, 
   ENEMY_SIZE, 
-  ENEMY_COLORS,
+  ENEMY_IMAGES,
   MAP_SIZE,
   NODE_SIZE,
   HEALTHBAR
@@ -31,20 +31,47 @@ let lastRenderTime = 0;
 ///////////////////////////////
 
 
+// PANEL ELEMNTS
+let startMsg = document.createElement('div');
+startMsg.innerHTML = 'SELECT DIFFICULTY';
+startMsg.className = 'start-msg msg';
 
-// PANEL BUTTONS
-let unpauseBtn = document.createElement('button');
-unpauseBtn.innerHTML = 'unpause';
-let restartBtn = document.createElement('button');
+let winMsg = document.createElement('div');
+winMsg.innerHTML = 'YOU WIN!';
+winMsg.className = 'win-msg msg';
+
+let lostMsg = document.createElement('div');
+lostMsg.innerHTML = 'YOU LOSE :(';
+lostMsg.className = 'lose-msg msg';
+
+let pauseMsg = document.createElement('div');
+pauseMsg.innerHTML = 'PAUSED';
+pauseMsg.className = 'pause-msg msg';
+
+let unpauseBtn = document.createElement('div');
+unpauseBtn.innerHTML = 'resume';
+unpauseBtn.className = 'pause-btn btn';
+
+let restartBtn = document.createElement('div');
 restartBtn.innerHTML = 'restart game';
-let exitBtn = document.createElement('button');
+restartBtn.className = 'pause-btn btn';
+
+let exitBtn = document.createElement('div');
 exitBtn.innerHTML = 'exit game';
-let easyBtn = document.createElement('button');
+exitBtn.className = 'pause-btn btn';
+
+let easyBtn = document.createElement('div');
 easyBtn.innerHTML = 'easy';
-let mediumBtn = document.createElement('button');
+easyBtn.className = 'start-btn btn';
+
+let mediumBtn = document.createElement('div');
 mediumBtn.innerHTML = 'medium';
-let hardBtn = document.createElement('button');
+mediumBtn.className = 'start-btn btn';
+
+let hardBtn = document.createElement('div');
 hardBtn.innerHTML = 'hard';
+hardBtn.className = 'start-btn btn';
+
 
 let upgradeBtn = document.getElementById('upgrade-btn');
 let sellBtn = document.getElementById('sell-btn');
@@ -58,6 +85,7 @@ let nextLevelBtn = document.getElementById('next-lvl-btn');
 // unpause game
 unpauseBtn.addEventListener('click', () => {
   game.unpause();
+  gameboard.style.display = 'flex';
   pausePanel.hide();
 });
 
@@ -96,6 +124,7 @@ hardBtn.addEventListener('click', () => {
 // pause game
 pauseBtn.addEventListener('click', () => {
   game.pause();
+  gameboard.style.display = 'none';
   pausePanel.setPanel('pause');
   pausePanel.show();
 });
@@ -317,24 +346,33 @@ let flashingTransparency = 0;
 // PANEL ELEMENTS OBJECT
 const panelElements = {
   win: [
+    winMsg,
     restartBtn,
     exitBtn,
   ],
   lose: [
+    lostMsg,
     restartBtn,
     exitBtn,
   ],
   pause: [
+    pauseMsg,
     unpauseBtn,
     restartBtn,
     exitBtn,
   ],
   start: [
+    startMsg, 
     easyBtn,
     mediumBtn,
     hardBtn,
   ],
 }
+
+
+// GAME BOARD
+let gameboard = document.getElementById('game-board');
+gameboard.style.display = 'none';
 
 
 // Start/Pause Panel
@@ -371,6 +409,8 @@ function init(difficulty) {
   // draw all updated piecesw
   draw();
 
+  gameboard.style.display = 'flex';
+
 }
 
 
@@ -384,7 +424,6 @@ function main(currentTime) {
 
   lastRenderTime = currentTime;
 
-  console.log(game.gameOver)
   if(game.gameOver) {
     if(game.win) {
       if (pausePanel.getPanel() !== 'win') pausePanel.setPanel('win');
@@ -521,13 +560,12 @@ function drawMap() {
 
   // draw enemies to the map
   enemies.map(enemy => {
-    display.drawCircle(
-      enemy.x,
-      enemy.y,
-      ENEMY_SIZE / 2,
-      enemy.color,
-      // enemy.currentHealth / (enemy.startingHealth / 3),
-      1, // find a better way to animate health and death
+    display.drawImage(
+      ENEMY_IMAGES[enemy.type][enemy.getOrientation()],
+      enemy.x - ENEMY_SIZE / 2, 
+      enemy.y - ENEMY_SIZE / 2,
+      ENEMY_SIZE,
+      ENEMY_SIZE,
     )
 
     // draw enemy health bar

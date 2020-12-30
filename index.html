@@ -11,11 +11,28 @@
   </head>
   <body> 
     <div class="game">
-      <div class="title">Paper Defense</div>
+
+      <div class="images" style="display: none;">
+        <img src="res/nu.png" id="normal-up"/>
+        <img src="res/nd.png" id="normal-down"/>
+        <img src="res/nl.png" id="normal-left"/>
+        <img src="res/nr.png" id="normal-right"/>
+      </div>
+
+
+      
+      <div class="title-wrapper">
+        <div class="filler"> </div>
+        <div class="title">Paper Tower Defense</div>
+        <div class="author">
+          <div>By:</div>
+          <div>Evan Suong</div>
+        </div>
+      </div>
       <div id="pause-panel"></div>
 
       
-      <div class="game-board">
+      <div id="game-board">
 
         <div class="game-stats">
           <div id="lives"></div>
@@ -30,7 +47,7 @@
 
         <canvas width="750" height="750"></canvas>
 
-        <div class="tower-panel">
+        <div class="action-panel">
 
           <div class="game-store">
             <div id="pellet" class="tower-wrapper store-item"></div>
@@ -55,19 +72,17 @@
             <div id="sell-btn" class="tower-btn">sell</div>
 
           </div>
+
+          <div class="btn-panel">
+            <div id="next-lvl-btn" class="btn">Next Wave</div>
+            <div id="pause-btn" class="btn">Pause</div>
+          </div>
+
         </div>
       </div>
     </div>
 
-
-    <!-- <div id="win-panel">
-      <button id="restart-btn">Restart</button>
-    </div> -->
-    
-    <div class="btn-panel">
-      <button id="next-lvl-btn">Start Level</button>
-      <button id="pause-btn">Pause</button>
-    </div>
+   
    
     <script src="script.js" async defer type="module"></script>
   </body>

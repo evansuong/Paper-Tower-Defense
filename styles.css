@@ -1,29 +1,72 @@
+@font-face {
+  font-family: titlefont;
+  src: url('./res/ZukaDoodle-Kz7y.ttf');
+}
+
+@font-face {
+  font-family: textfont;
+  src: url('./res/QuickPencilRegular-0R59.ttf');
+}
+
 body {
   height: 100vh;
   width: 100vw;
   margin: 0;
   background-color: aliceblue;
+  background-image: url('./res/background.jpg');
+  background-size: cover;
 }
 
 canvas {
   width: 600px;
   height: 600px;
-  border-color: purple;
-  border-width: 5px;
-  border-style: solid;
 }
+
+.title-wrapper {
+  display: flex;
+  width: 100vw;
+  justify-content: space-between;
+}
+
+.filler {
+  width: 200px;
+}
+
+.title {
+  display: flex;
+  padding: 20px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  font-family: titlefont;
+  font-size: 6vw;
+}
+
+.author {
+  font-family: textfont;
+  font-size: 2.5vw;
+  margin-top: 30px;
+  margin-right: 40px;
+  transform: rotate(7deg);
+}
+
+
 
 .game {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .game-stats {
   display: flex;
   flex-direction: column;
-  border-color: red;
-  border-width: 5px;
-  border-style: solid;
+  font-family: textfont;
+  font-size: 30px;
+}
+
+.game-stats * {
+  margin-top: 13px;
 }
 
 .numbers {
@@ -34,54 +77,129 @@ canvas {
 #level-counter {
   display: flex;
   flex-direction: column;
-  border-color: blue;
-  border-width: 5px;
-  border-style: solid;
 }
 
 
-.game-board {
+#game-board {
   display: flex;
   justify-content: center;
-  border-color: green;
-  border-width: 5px;
-  border-style: solid;
 }
+
+
+
 
 .btn-panel {
   display: flex;
   flex-direction: column;
-}
-
-
-.tower-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-#pause-panel {
-  position: absolute;
-  z-index: 999;
-  background-color: black;
   align-items: center;
   justify-content: center;
-  width: 300px;
-  height: 300px;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  padding: 100px;
 }
+
+
+.action-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: space-between;
+  height: 600px;
+  background-color: lightgreen;
+}
+
+
+
+
+
+
+#pause-panel {
+  margin-top: 20px;
+  background-image: url('./res/panel-background.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  
+  display: flex; 
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 50px;
+  z-index: 999;
+  width: 400px;
+  height: 400px;
+
+  color: red;
+}
+
+
+.msg {
+  font-family: textfont;
+  font-size: 55px;
+  margin-bottom: 30px;
+}
+
+.start-msg {
+  color: red;
+  transform: rotate(3deg);
+}
+
+.pause-msg {
+  color: black;
+  transform: rotate(-3deg);
+}
+
+.win-msg {
+  font-size: 70px;
+  color: green;
+  transform: rotate(2deg);
+}
+
+.lose-msg {
+  font-size: 70px;
+  color: red;
+  transform: rotate(-2deg);
+}
+
+
+.btn {
+  width: 100%;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: textfont;
+  font-size: 30px;
+  margin: 15px;
+  background-color: transparent;
+  border-color: transparent
+}
+
+.btn:hover {
+  transform: translateY(2px);
+}
+
+
+.start-btn {
+  color: red;
+}
+
+.start-btn:hover {
+  color: darkred;
+}
+
+.pause-btn {
+  color: black
+}
+
+.pause-btn:hover {
+}
+
+
+
+
 
 .game-store {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  border-color: black;
-  border-width: 10px;
-  border-style: solid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   background-color: black;
 }
 
@@ -156,16 +274,3 @@ canvas {
   opacity: .75;
 }
 
-
-/* use this for when you're holding a tower and you gotta place it, set the classname to heightlighted whenever you're above the node */
-.highlighted {
-  background-color: aliceblue;
-}
-
-.enemy {
-  width: 10px;
-  height: 10px;
-  border-radius: 100px;
-  background-color: purple;
-  position: absolute;
-}

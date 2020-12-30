@@ -33,6 +33,11 @@ Display.prototype.drawCircle = function(x, y, radius, color, transparency=1) {
   this.buffer.fill();
 };
 
+Display.prototype.drawImage = function(img, x, y, width, height) {
+  this.buffer.imageSmoothingEnabled = true;
+  this.buffer.drawImage(img, x, y, width, height);
+}
+
 // draws background to the buffer
 Display.prototype.fill = function(color) {
   this.buffer.fillStyle = color;
@@ -44,68 +49,3 @@ Display.prototype.draw = function() {
   this.context.clearRect(0, 0, this.context.width, this.context.height);
   this.context.drawImage(this.buffer.canvas, 0, 0, this.buffer.canvas.width, this.buffer.canvas.height, 0, 0, this.context.canvas.width, this.context.canvas.height); 
 };
-
-/**
- * draws the game grid with all the towers 
- * @param {array} grid the game map with all the towers
- */
-// Display.prototype.drawMap = function(map) {
-
-//   let { grid, enemies } = map;
-  
-//   grid.nodes.forEach(node => {
-//     // don't draw empty nodes
-//     if (node.type === 'empty') return;
-//     // draw non empty nodes to the buffer
-//     this.drawRectangle(
-//       node.col * this.nodeWidth,
-//       node.row * this.nodeHeight, 
-//       this.nodeWidth, 
-//       this.nodeHeight, 
-//       towerColors[node.type]
-//     );
-//   });
-
-//   enemies.map(enemy => {
-//     this.drawCircle(
-//       enemy.x,
-//       enemy.y,
-//       ENEMY_SIZE,
-//       ENEMY_SIZE,
-//       enemy.color,
-//     )
-//   });
-// }
-
-/**
- * draws all the extra stuff like the tower store, health and money counts, and level selector
- * @param {object} gameStats contains game stats like the store, money, health, etc
- */
-// Display.prototype.drawOutsideElements = function(gameStats) {
-//   // console.log('drawing outside elements')
-// }
-
-
-
-
-
-
-  // this.resize = function(width, height, height_width_ratio) {
-
-  //   if (height / width > height_width_ratio) {
-
-  //     this.context.canvas.height = width * height_width_ratio;
-  //     this.context.canvas.width = width;
-
-  //   } else {
-
-  //     this.context.canvas.height = height;
-  //     this.context.canvas.width = height / height_width_ratio;
-
-  //   }
-
-  //   this.context.imageSmoothingEnabled = false;
-
-  // };
-
-

@@ -1,4 +1,9 @@
 
+const normalUp = document.getElementById('normal-up');
+const normalDown = document.getElementById('normal-down');
+const normalLeft = document.getElementById('normal-left');
+const normalRight = document.getElementById('normal-right');
+
 
 export const constants = {
 
@@ -46,6 +51,15 @@ export const constants = {
   ENEMY_COLORS: {
     normal: 'rgb(180, 180, 180)',
     speed:  'rgb(200, 150, 180)',
+  },
+
+  ENEMY_IMAGES: {
+    normal: {
+      up: normalUp,
+      down: normalDown,
+      left: normalLeft,
+      right: normalRight,
+    }
   },
 
   SELECTED_COLOR: 'rgba(255, 165, 0, ',

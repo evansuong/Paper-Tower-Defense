@@ -586,6 +586,7 @@ export function Enemy(
   this.currentHealth  = this.startingHealth; 
   this.onReachedEnd   = onReachedEnd;
   this.onDeath        = onDeath;
+  this.orientation    = 'right';
   this.findPath()
 }
 
@@ -642,8 +643,10 @@ Enemy.prototype.calculateMovement = function(nextNode, currentNode) {
   // is the next node in the column to left or right
   if (nextNode.col > currentNode.col) {
     xMovement = this.speed;
+    this.orientation = 'right';
   } else if (nextNode.col < currentNode.col) {
     xMovement = -this.speed;
+    this.orientation = 'left';
   }
 
   // check if enemy should move vertically and in what direction
@@ -652,8 +655,10 @@ Enemy.prototype.calculateMovement = function(nextNode, currentNode) {
   // is the next node in the row above or below
   if(nextNode.row > currentNode.row) {
     yMovement = this.speed;
+    this.orientation = 'down';
   } else if (nextNode.row < currentNode.row) {
     yMovement = -this.speed;
+    this.orientation = 'up';
   }
 
   // returns the amount and in which direction the enemy will move next update
@@ -696,7 +701,9 @@ Enemy.prototype.getShot = function(damage) {
   }
 }
 
-
+Enemy.prototype.getOrientation = function() {
+  return this.orientation;
+}
 
 function buildAStarGrid(grid) {
   // turn grid into 2D array of either empty of filled nodes
