@@ -1,36 +1,62 @@
 
 const normalUp = document.getElementById('normal-up');
 const normalDown = document.getElementById('normal-down');
+// normalDown.style.width = '50px';
+// normalDown.style.height = '50px';
 const normalLeft = document.getElementById('normal-left');
 const normalRight = document.getElementById('normal-right');
+
+const paperHole = new Image();
+paperHole.src = 'res/paper-hole.png';
+
+const pellet = createImage('res/p');
+const pelletFinal = createImage('res/p2');
+const fire = createImage('res/f');
+const fireFinal = createImage('res/f2');
+const freeze = createImage('res/i');
+const freezeFinal = createImage('res/i2');
+const earthquake = createImage('res/e');
+const earthquakeFinal = createImage('res/e2');
+const machine = createImage('res/m');
+const machineFinal = createImage('res/m2');
+const air = createImage('res/a');
+const airFinal = createImage('res/a2');
+
+
+function createImage(src) {
+  const image = new Image();
+  image.src = src + '.png';
+  return image
+}
+
 
 
 export const constants = {
 
   FPS:               24,
-  ENEMY_SIZE:        20,
+  ENEMY_SIZE:        80,
   TOWER_SIZE_OFFSET: 15,
-  MAP_SIZE:          600,
+  MAP_SIZE:          2040,
   START_MONEY:       100000000,  
-  GRID_DIMS:         20,
-  NODE_SIZE:         600 / 20,
+  GRID_DIMS:         15,
+  NODE_SIZE:         2040 / 15,
   SPAWN_COOLDOWN:    3,
 
   HEALTHBAR: {
-    width:  20,
-    height: 3,
+    width:  80,
+    height: 10,
     color1: 'red',
     color2: 'green'
   },
 
   START_POS: {
     col: 0,
-    row: 10,
+    row: 7,
   },
 
   END_POS: {
-    col: 19, 
-    row: 10,
+    col: 14, 
+    row: 7,
   },
 
   LIVES: {
@@ -43,8 +69,8 @@ export const constants = {
 
   // enemy contains a base speed and base health that increase based on difficulty
   ENEMY_STATS: {
-    normal: buildEnemyObjects(20, 2),
-    speed:  buildEnemyObjects(20, 5),
+    normal: buildEnemyObjects(20, 5),
+    speed:  buildEnemyObjects(20, 10),
   },
 
   // replace with image urls
@@ -66,22 +92,40 @@ export const constants = {
 
   // tower stats are base damage, base cost, range, shots per second, shotspread respectively
   TOWER_STATS: {
-    pellet:     buildTowerObjects(1, 100, 3, 4, 1),
-    splash:     buildTowerObjects(2, 750, 2, 12, 2),
+    pellet:     buildTowerObjects(1, 100, 3, 4, 1, pellet, pelletFinal),
+    fire:       buildTowerObjects(2, 750, 2, 12, 2),
     air:        buildTowerObjects(3, 1500, 3, 2, 3),
-    ice:        buildTowerObjects(0, 2000, 1, 1, 10),
+    freeze:     buildTowerObjects(0, 2000, 1, 1, 10),
     earthquake: buildTowerObjects(3, 3000, 3, 1, 10),
     machine:    buildTowerObjects(3, 4000, 3, 24, 1),
   },
 
   // replace with image urls
-  TOWER_COLORS: {
-    pellet:     'black',
-    splash:     'blue',
-    air:        'yellow',
-    earthquake: 'burlywood',
-    ice:        'cyan',
-    machine:    'slategray'
+  TOWER_IMAGES: {
+    pellet: {
+      base:  pellet,
+      final: pelletFinal
+    },
+    fire: {
+      base: fire,
+      final: fireFinal
+    },
+    air: {
+      base: air,
+      final: airFinal
+    },
+    earthquake: {
+      base: earthquake,
+      final: earthquakeFinal
+    },
+    freeze: {
+      base: freeze,
+      final: freezeFinal
+    },
+    machine: {
+      base: machine,
+      final: machineFinal
+    }
   },
 
   // tower stat labels for stat panel
@@ -98,9 +142,15 @@ export const constants = {
   },
 
   // replace with image urls
-  NODE_COLORS: {
-    start: 'green',
-    end:   'red'
+  NODE_IMAGES: {
+    start: {
+      img: paperHole,
+      color: '#0D4300'
+    },
+    end: {
+      img: paperHole,
+      color: '#430000'
+    },
   },
 }
 

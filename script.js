@@ -9,9 +9,9 @@ import { PausePanel } from "./pausePanel.js";
 // global vars
 const { 
   FPS, 
-  NODE_COLORS,
+  NODE_IMAGES,
   TOWER_STATS,
-  TOWER_COLORS,
+  TOWER_IMAGES,
   TOWER_STAT_LABELS, 
   SELECTED_COLOR, 
   ENEMY_SIZE, 
@@ -50,27 +50,27 @@ pauseMsg.className = 'pause-msg msg';
 
 let unpauseBtn = document.createElement('div');
 unpauseBtn.innerHTML = 'resume';
-unpauseBtn.className = 'pause-btn btn';
+unpauseBtn.className = 'pause-btn panel-btn btn';
 
 let restartBtn = document.createElement('div');
 restartBtn.innerHTML = 'restart game';
-restartBtn.className = 'pause-btn btn';
+restartBtn.className = 'pause-btn panel-btn btn';
 
 let exitBtn = document.createElement('div');
 exitBtn.innerHTML = 'exit game';
-exitBtn.className = 'pause-btn btn';
+exitBtn.className = 'pause-btn panel-btn btn';
 
 let easyBtn = document.createElement('div');
 easyBtn.innerHTML = 'easy';
-easyBtn.className = 'start-btn btn';
+easyBtn.className = 'start-btn panel-btn btn';
 
 let mediumBtn = document.createElement('div');
 mediumBtn.innerHTML = 'medium';
-mediumBtn.className = 'start-btn btn';
+mediumBtn.className = 'start-btn panel-btn btn';
 
 let hardBtn = document.createElement('div');
 hardBtn.innerHTML = 'hard';
-hardBtn.className = 'start-btn btn';
+hardBtn.className = 'start-btn panel-btn btn';
 
 
 let upgradeBtn = document.getElementById('upgrade-btn');
@@ -144,7 +144,6 @@ let livesLabel = document.getElementById('lives');
 let moneyLabel = document.getElementById('money');
 let levelLabel = document.getElementById('level');
 let difficultyLabel = document.getElementById('difficulty');
-let currentLevelLabel = document.getElementById('current-level');
 let nextLevelLabel = document.getElementById('next-level');
 
 
@@ -386,7 +385,7 @@ let game = {};
 // View
 const display = new Display(document.querySelector('canvas'));
 // Controller
-const controller = new Controller();
+const controller = new Controller(display.buffer.canvas);
 
   
 // set the internal canvas width and height 
@@ -426,9 +425,15 @@ function main(currentTime) {
 
   if(game.gameOver) {
     if(game.win) {
-      if (pausePanel.getPanel() !== 'win') pausePanel.setPanel('win');
+      if (pausePanel.getPanel() !== 'win') {
+        pausePanel.setPanel('win');
+        gameboard.style.display = 'none';
+      }
     } else {
-      if (pausePanel.getPanel() !== 'lose') pausePanel.setPanel('lose');
+      if (pausePanel.getPanel() !== 'lose') {
+        pausePanel.setPanel('lose');
+        gameboard.style.display = 'none';
+      }
     }
   }
 
@@ -464,12 +469,16 @@ function update() {
   let { type, levels, lives, money, level, difficulty } = game.getLevelStats();
 
   // update lives and money based on game stats 
-  livesLabel.innerHTML = '<3 ' + lives;
+  livesLabel.innerHTML = 'Lives: ' + lives;
   moneyLabel.innerHTML = '$' + money;
-  levelLabel.innerHTML = 'level: ' + level; 
+  levelLabel.innerHTML = 'Level: ' + level; 
   difficultyLabel.innerHTML = 'difficulty: ' + difficulty;
-  currentLevelLabel.innerHTML = type;
-  if (levels.length > 1) nextLevelLabel.innerHTML = levels[1].enemyType;
+  nextLevelLabel.innerHTML = '';
+
+
+  if (levels.length > 1) {
+    nextLevelLabel.appendChild(ENEMY_IMAGES[levels[1].enemyType]['down']);
+  }
   else nextLevelLabel.style.display = 'none';
 
   // increase flashing transparency
@@ -477,7 +486,7 @@ function update() {
 }
 
 
-
+// TODO: check path on tower placement
 
 
 ///////////////////////////////////
@@ -517,13 +526,16 @@ function drawMap() {
 
     // draw tower node
     if (node.type === 'tower') {
-      display.drawRectangle(
+
+      let towerImg = TOWER_IMAGES[node.tower.type];
+      if (node.tower.level === 4) towerImg = towerImg.final;
+      else towerImg = towerImg.base;
+      display.drawImage(
+        towerImg,
         node.col * NODE_SIZE,
         node.row * NODE_SIZE, 
         NODE_SIZE, 
         NODE_SIZE, 
-        TOWER_COLORS[node.tower.type],
-        1
       );
 
       // draw tower range if it is clicked by player
@@ -544,16 +556,25 @@ function drawMap() {
           flashingTransparency,
         )
       } 
+    }
      
+    if (node.isStart || node.isEnd) {
     // draw start and end node
-    } else {
+
       display.drawRectangle(
         node.col * NODE_SIZE,
+        node.row * NODE_SIZE,
+        NODE_SIZE,
+        NODE_SIZE,
+        NODE_IMAGES[node.type].color
+      );
+
+      display.drawImage(
+        NODE_IMAGES[node.type].img,
+        node.col * NODE_SIZE,
         node.row * NODE_SIZE, 
-        NODE_SIZE, 
-        NODE_SIZE, 
-        NODE_COLORS[node.type],
-        1
+        NODE_SIZE + 10, 
+        NODE_SIZE + 10, 
       );
     }
   });

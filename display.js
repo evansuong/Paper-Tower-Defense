@@ -34,7 +34,7 @@ Display.prototype.drawCircle = function(x, y, radius, color, transparency=1) {
 };
 
 Display.prototype.drawImage = function(img, x, y, width, height) {
-  this.buffer.imageSmoothingEnabled = true;
+  this.buffer.imageSmoothingEnabled = false;
   this.buffer.drawImage(img, x, y, width, height);
 }
 

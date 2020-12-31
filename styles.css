@@ -9,7 +9,7 @@
 }
 
 body {
-  height: 100vh;
+  height: 95vh;
   width: 100vw;
   margin: 0;
   background-color: aliceblue;
@@ -18,10 +18,19 @@ body {
 }
 
 canvas {
-  width: 600px;
-  height: 600px;
+  width: 560px;
+  height: 560px;
 }
 
+
+
+
+
+
+
+
+
+/* GAME TITLE */
 .title-wrapper {
   display: flex;
   width: 100vw;
@@ -34,51 +43,48 @@ canvas {
 
 .title {
   display: flex;
-  padding: 20px;
   margin-top: 10px;
+  margin-bottom: 5px;
   justify-content: center;
   align-items: center;
   font-family: titlefont;
-  font-size: 6vw;
+  font-size: 5vw;
 }
 
 .author {
   font-family: textfont;
-  font-size: 2.5vw;
-  margin-top: 30px;
-  margin-right: 40px;
+  font-size: 2vw;
+  margin-top: 20px;
+  margin-right: 5vw;
   transform: rotate(7deg);
 }
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* GAME CONTAINERS */
 .game {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 5px;
 }
 
-.game-stats {
-  display: flex;
-  flex-direction: column;
-  font-family: textfont;
-  font-size: 30px;
+.game-wrapper {
+  padding: 15px;
+  background-image: url('./res/game-border-cropped.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
-
-.game-stats * {
-  margin-top: 13px;
-}
-
-.numbers {
-  display: flex;
-  flex-direction: column;
-}
-
-#level-counter {
-  display: flex;
-  flex-direction: column;
-}
-
 
 #game-board {
   display: flex;
@@ -88,6 +94,164 @@ canvas {
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* GAME STAT POST ITS */
+.game-stat-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.game-stats {
+  background-image: url('./res/stat-background.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform: rotate(7deg);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-family: textfont;
+  font-size: 2.2vw;
+
+  width: 230px;
+  height: 230px;
+}
+
+.game-stats * {
+  width: 150px;
+  margin: 1px;
+}
+
+.difficulty {
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+#next-level {
+  text-align: center;
+}
+
+#next-level * {
+  margin-top: 2px;
+  width: 50px;
+  height: 50px;
+}
+
+
+.player-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-top: 20px;
+  margin-top: -40px;
+
+  background-image: url('./res/stat-background.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform: rotate(-7deg);
+
+  font-family: textfont;
+  font-size: 25px;
+
+  width: 150px;
+  height: 150px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* TOWER PANEL */
+.action-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  background-image: url('./res/tower-panel-background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: rotate(-2deg);
+
+  padding: 20px;
+  height: 80vh;
+}
+
+.game-store {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: textfont;
+  font-size: 30px;
+}
+
+.tower-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: min-content;
+  margin-left: 30px;
+  border-color: black;
+  border-width: 5px;
+}
+
+.tower-grid * {
+  margin: 3px;
+  background-color: rgba(0, 0, 0, .4);
+  padding: 5px;
+  border-radius: 5px;;
+}
+
+#tower-stat-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: textfont;
+  font-size: 25px;
+  margin: 20px;
+}
+
+.tower-wrapper {
+  width: 40px;
+  height: 40px;
+}
+
+.tower-wrapper:hover {
+  background-color: gray;
+}
+
+
+.mouse-drag-object {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  opacity: .75;
+}
+
+
 .btn-panel {
   display: flex;
   flex-direction: column;
@@ -95,14 +259,21 @@ canvas {
   justify-content: center;
 }
 
+.next-lvl-btn-wrapper {
+  background-image: url('res/next-arrow.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  padding: 50px;
+  margin-left: 30px;
+}
 
-.action-panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: space-between;
-  height: 600px;
-  background-color: lightgreen;
+#next-lvl-btn {
+  font-size: 30px;
+  margin-top: -20px;
+}
+
+#pause-btn {
+  font-size: 40px;
 }
 
 
@@ -110,6 +281,18 @@ canvas {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* PAUSE PANEL */
 #pause-panel {
   margin-top: 20px;
   background-image: url('./res/panel-background.png');
@@ -158,14 +341,16 @@ canvas {
   transform: rotate(-2deg);
 }
 
-
 .btn {
-  width: 100%;
-  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: textfont;
+}
+
+.panel-btn {
+  width: 100%;
+  height: 35px;
   font-size: 30px;
   margin: 15px;
   background-color: transparent;
@@ -189,88 +374,5 @@ canvas {
   color: black
 }
 
-.pause-btn:hover {
-}
 
-
-
-
-
-.game-store {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  background-color: black;
-}
-
-#tower-stat-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgba(0, 0, 0, .5);
-}
-
-.tower-wrapper {
-  width: 50px;
-  height: 50px;
-}
-
-.tower-wrapper:hover {
-  background-color: gray;
-}
-
-#pellet {
-  background-color: black;
-}
-
-#pellet-tower-dragging {
-  background-color: black;
-}
-
-#splash {
-  background-color: blue;
-}
-
-#splash-tower-dragging {
-  background-color: blue;
-}
-
-#air {
-  background-color: yellow;
-}
-
-#air-tower-dragging {
-  background-color: yellow;
-}
-
-#ice {
-  background-color: cyan;
-}
-
-#ice-tower-dragging {
-  background-color: cyan;
-}
-
-#earthquake {
- background-color: burlywood;
-}
-
-#earthquake-tower-dragging {
-  background-color: burlywood;
-}
-
-#machine {
-  background-color: slategrey;
-}
-
-#machine-tower-dragging {
-  background-color: slategrey;
-}
-
-.mouse-drag-object {
-  width: 30px;
-  height: 30px;
-  position: absolute;
-  opacity: .75;
-}
 

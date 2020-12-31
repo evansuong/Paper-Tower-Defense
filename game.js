@@ -182,9 +182,7 @@ Game.prototype.onGameLose = function() {
 // build tower
 Game.prototype.buildTower = function(towerType, x, y, difficulty) {
 
-  // subtract tower cost from player money
-  this.stats.money = this.stats.money - TOWER_STATS[towerType][difficulty].purchaseCost;
-
+  
   // get grid row and column 
   let { col, row } = this.map.grid.getNodeRowCol(x, y);
 
@@ -194,6 +192,20 @@ Game.prototype.buildTower = function(towerType, x, y, difficulty) {
   // place tower node in grid
   this.map.grid.nodes = this.map.grid.placeTower(tower);
 
+  // check if tower blocks path
+  if (this.findPath().length === 0) {
+
+    // if path is blocked then sell tower
+    this.selectTower(tower.col * NODE_SIZE, tower.row * NODE_SIZE);
+    this.sellTower(false);
+
+    console.log('tower blocks path');
+    return;
+  }
+
+  // subtract tower cost from player money
+  this.stats.money = this.stats.money - TOWER_STATS[towerType][difficulty].purchaseCost;
+
   // add new tower to game tower list
   this.map.towers.set(tower.toHash(), tower);
 
@@ -201,6 +213,34 @@ Game.prototype.buildTower = function(towerType, x, y, difficulty) {
   this.map.enemies.forEach(enemy => {
     enemy.findPath();
   });  
+}
+
+// call this only when a tower is placed or the enemy spawns
+Game.prototype.findPath = function() {
+
+  // get current node as the start node
+  let startNode = this.map.grid.getStartNode();
+  let endNode = this.map.grid.getEndNode();
+
+  // convert node grid to astar tranparency grid
+  let aStarGrid = new Graph(buildAStarGrid(this.map.grid));
+
+  // declare start and end nodes
+  var start = aStarGrid.grid[startNode.row][startNode.col];
+  var end = aStarGrid.grid[endNode.row][endNode.col];
+
+  // console.log('start node 324', start)
+  // console.log('endNode 325', end)
+  // get shortest path from start to end node
+  var resultWithDiagonals = astar.search(
+    aStarGrid, 
+    start, 
+    end, 
+    {
+      heuristic: astar.heuristics.diagonal 
+    }
+  );
+  return getPathFromAStar(resultWithDiagonals);
 }
 
 
@@ -225,7 +265,7 @@ Game.prototype.upgradeTower = function() {
 }
 
 
-Game.prototype.sellTower = function() {
+Game.prototype.sellTower = function(refund=true) {
   this.map.grid.nodes.forEach(node => {
     if (node.type === 'tower' && node.isSelected()) {
       let towerToDelete = node.tower;
@@ -233,8 +273,10 @@ Game.prototype.sellTower = function() {
       // remove towernode from grid
       this.map.grid.removeTower(towerToDelete.col, towerToDelete.row);
 
-      // get money back
-      this.stats.money = this.stats.money + towerToDelete.sellCost;
+      // get money back (quick fix solution, should probably make this better)
+      if (refund) {
+        this.stats.money = this.stats.money + towerToDelete.sellCost;
+      }
 
       // remove tower from tower map
       this.map.towers.delete(towerToDelete.toHash());
@@ -469,7 +511,7 @@ export function Tower(type, col, row, difficulty) {
   this.level          = 1;
   this.damage         = TOWER_STATS[type][difficulty].damage[0];
   // TODO: change this to uppgrade cost
-  this.purchaseCost   = TOWER_STATS[type][difficulty].purchaseCost[0];
+  this.purchaseCost   = TOWER_STATS[type][difficulty].purchaseCost;
   this.upgradeCost    = TOWER_STATS[type][difficulty].upgradeCost[0];
   this.range          = TOWER_STATS[type][difficulty].range[0];
   this.shotsPerSecond = TOWER_STATS[type][difficulty].shotsPerSecond;
@@ -627,11 +669,21 @@ Enemy.prototype.update = function() {
 
 Enemy.prototype.getCurrentNode = function() {
 
-  // get the current node that the enemy is in
-  let nodeX = Math.floor(this.x / NODE_SIZE);
-  let nodeY = Math.floor(this.y / NODE_SIZE);
+  let xOffset = 0;
+  let yOffset = 0;
 
-  return { col: nodeX, row: nodeY };
+  if (this.orientation === 'right' && this.x > 80) xOffset = ENEMY_SIZE / 2;
+  if (this.orientation === 'left') xOffset = -ENEMY_SIZE / 2;
+  if (this.orientation === 'up') yOffset = -ENEMY_SIZE / 2;
+  if (this.orientation === 'down') yOffset = ENEMY_SIZE / 2;
+
+
+  // get the current node that the enemy is in
+  let col = Math.floor((this.x - xOffset) / NODE_SIZE);
+  let row = Math.floor((this.y - yOffset) / NODE_SIZE);
+  console.log(col, row)
+
+  return { col: col, row: row };
 }
 
 

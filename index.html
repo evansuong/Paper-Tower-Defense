@@ -17,6 +17,7 @@
         <img src="res/nd.png" id="normal-down"/>
         <img src="res/nl.png" id="normal-left"/>
         <img src="res/nr.png" id="normal-right"/>
+        <!-- <img src="res" -->
       </div>
 
 
@@ -34,29 +35,45 @@
       
       <div id="game-board">
 
-        <div class="game-stats">
-          <div id="lives"></div>
-          <div id="money"></div>
-          <div id="level"></div>
-          <div id="difficulty"></div>
-          <div>Current Level:</div>
-          <div id="current-level"></div>
-          <div>Next Level:</div>
-          <div id="next-level"></div>
-        </div>
+        <div class="game-stat-wrapper">
+          <div class="game-stats">
+            <div class="difficulty">
+              <div id="difficulty"></div>
+            </div>
+            <div>Next Level:</div>
+            <div id="next-level"></div>
+          </div>
 
-        <canvas width="750" height="750"></canvas>
+          <div class="player-stats">
+            <div id="lives"></div>
+            <div id="money"></div>
+            <div id="level"></div>
+          </div>
+        </div>
+       
+
+        <div class="game-wrapper">
+          <canvas width="2048" height="2048"></canvas>
+        </div>
 
         <div class="action-panel">
 
-          <div class="game-store">
-            <div id="pellet" class="tower-wrapper store-item"></div>
-            <div id="splash" class="tower-wrapper store-item"></div>
-            <div id="air" class="tower-wrapper store-item"></div>
-            <div id="ice" class="tower-wrapper store-item"></div>
-            <div id="earthquake" class="tower-wrapper store-item"></div>
-            <div id="machine" class="tower-wrapper store-item"></div>
+          <div class="game-store"> 
+            <div>Towers:</div>
+
+            <div class="tower-grid">
+
+              <img id="pellet" class="tower-wrapper store-item" src="res/p.png"/>
+              <img id="fire" class="tower-wrapper store-item" src="res/f.png"/>
+              <img id="air" class="tower-wrapper store-item" src="res/a.png"/>
+              <img id="freeze" class="tower-wrapper store-item" src="res/i.png"/>
+              <img id="earthquake" class="tower-wrapper store-item" src="res/e.png"/>
+              <img id="machine" class="tower-wrapper store-item" src="res/m.png"/>
+            </div>
+
           </div>
+         
+         
 
           <div id="tower-stat-wrapper">
 
@@ -74,7 +91,9 @@
           </div>
 
           <div class="btn-panel">
-            <div id="next-lvl-btn" class="btn">Next Wave</div>
+            <div class="next-lvl-btn-wrapper btn">
+              <div id="next-lvl-btn">Next Wave</div>
+            </div>
             <div id="pause-btn" class="btn">Pause</div>
           </div>
 

@@ -5,11 +5,12 @@ const {
   MAP_SIZE
 } = constants;
 
-export const Controller = function() {
+export const Controller = function(canvas) {
 
   this.mousePos = { x: 0, y: 0 };
   this.dragging = false;
   this.dragObject = {};
+  this.canvas = canvas;
 
 }
 
@@ -47,10 +48,12 @@ Controller.prototype.isMouseInCanvas = function() {
 // get mouse position relative to the canvas
 Controller.prototype.setMousePos = function(e) {
   var rect = document.querySelector('canvas').getBoundingClientRect();
+  var scaleX = this.canvas.width / rect.width;    // relationship bitmap vs. element for X
+  var scaleY = this.canvas.height / rect.height;  // relationship bitmap vs. element for Y
   this.mousePos = {
-    x: e.clientX - rect.left - 5,
-    y: e.clientY - rect.top - 5
-  };
+      x: (e.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+      y: (e.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+    }
 }
 
 Controller.prototype.onMouseUp = function(e) {
