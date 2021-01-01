@@ -16,7 +16,6 @@ export const Controller = function(canvas) {
 
 Controller.prototype.onMouseClick = function(e, dragObject) {
   dragObject.className = 'mouse-drag-object';
-  dragObject.id = `${e.target.id}`;
   dragObject.style.left = e.pageX - TOWER_SIZE_OFFSET + 'px';
   dragObject.style.top = e.pageY - TOWER_SIZE_OFFSET + 'px';
   this.dragObject = dragObject;
@@ -70,3 +69,4 @@ Controller.prototype.getDragObject = function() {
 }
 
 
+// TODO: ENEMY SPRITES AND TOWER EFFECTS

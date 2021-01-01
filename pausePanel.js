@@ -7,7 +7,6 @@ export function PausePanel(panel, elements) {
 }
 
 PausePanel.prototype.setPanel = function(type) {
-  console.log('setting panel to', type)
   this.panel.textContent = '';
   this.type = type;
 

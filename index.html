@@ -12,14 +12,7 @@
   <body> 
     <div class="game">
 
-      <div class="images" style="display: none;">
-        <img src="res/nu.png" id="normal-up"/>
-        <img src="res/nd.png" id="normal-down"/>
-        <img src="res/nl.png" id="normal-left"/>
-        <img src="res/nr.png" id="normal-right"/>
-        <!-- <img src="res" -->
-      </div>
-
+     
 
       
       <div class="title-wrapper">
@@ -58,7 +51,7 @@
 
         <div class="action-panel">
 
-          <div class="game-store"> 
+          <div class="tower-panel"> 
             <div>Towers:</div>
 
             <div class="tower-grid">
@@ -71,33 +64,50 @@
               <img id="machine" class="tower-wrapper store-item" src="res/m.png"/>
             </div>
 
+            <div id="tower-stat-wrapper">
+              <div class="tower-stats"> 
+
+                <div id="labels">
+                  <div class="tower-stat-label">type:</div>
+                  <div class="tower-stat-label">level:</div>
+                  <div class="tower-stat-label">dps:</div>
+                  <div class="tower-stat-label">range:</div>
+                  <div class="tower-stat-label">shot spread:</div>
+                  <div class="tower-stat-label">reload speed:</div>
+                </div>
+
+                <div id="values">
+                  <div id="type" class="tower-stat"></div>
+                  <div id="level" class="tower-stat"></div>
+                  <div id="damage" class="tower-stat"></div>
+                  <div id="range" class="tower-stat"></div>
+                  <div id="reload" class="tower-stat"></div>
+                  <div id="spread" class="tower-stat"></div>
+                </div>
+
+              </div>
+
+              <div class="buttons">
+                <div id="upgrade-btn" class="tower-btn btn">upgrade</div>
+                <div id="sell-btn" class="tower-btn btn">sell</div>
+              </div>
+            </div>
+           
           </div>
          
          
 
-          <div id="tower-stat-wrapper">
-
-            <div id="type" class="tower-stat"></div>
-            <div id="level" class="tower-stat"></div>
-            <div id="damage" class="tower-stat"></div>
-            <div id="cost" class="tower-stat"></div>
-            <div id="range" class="tower-stat"></div>
-            <div id="reload" class="tower-stat"></div>
-            <div id="spread" class="tower-stat"></div>
-            <div id="sell" class="tower-stat"></div>
-            <div id="upgrade-btn" class="tower-btn">upgrade</div>
-            <div id="sell-btn" class="tower-btn">sell</div>
-
-          </div>
+          
 
           <div class="btn-panel">
-            <div class="next-lvl-btn-wrapper btn">
+            <div id="next-lvl-btn-wrapper" class="btn">
               <div id="next-lvl-btn">Next Wave</div>
             </div>
             <div id="pause-btn" class="btn">Pause</div>
           </div>
 
         </div>
+        
       </div>
     </div>
 

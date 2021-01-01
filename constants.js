@@ -1,46 +1,74 @@
 
-const normalUp = document.getElementById('normal-up');
-const normalDown = document.getElementById('normal-down');
-// normalDown.style.width = '50px';
-// normalDown.style.height = '50px';
-const normalLeft = document.getElementById('normal-left');
-const normalRight = document.getElementById('normal-right');
+
+const normal = createEnemyImage('res/nr');
 
 const paperHole = new Image();
 paperHole.src = 'res/paper-hole.png';
 
 const pellet = createImage('res/p');
+const pelletDiagonal = createImage('res/pd')
 const pelletFinal = createImage('res/p2');
+const pelletFinalDiagonal = createImage('res/p2d');
+
 const fire = createImage('res/f');
+const fireDiagonal = createImage('res/fd');
 const fireFinal = createImage('res/f2');
+const fireFinalDiagonal = createImage('res/f2d');
+
 const freeze = createImage('res/i');
 const freezeFinal = createImage('res/i2');
+
 const earthquake = createImage('res/e');
 const earthquakeFinal = createImage('res/e2');
+
 const machine = createImage('res/m');
+const machineDiagonal = createImage('res/md');
 const machineFinal = createImage('res/m2');
+const machineFinalDiagonal = createImage('res/m2d');
+
 const air = createImage('res/a');
 const airFinal = createImage('res/a2');
+
+
+const MAP_SIZE = 2040;
+const GRID_DIMS = 15;
+const NODE_SIZE = MAP_SIZE / GRID_DIMS;
+const FPS = 24;
+const ENEMY_SIZE = 80;
+const TOWER_SIZE_OFFSET = 15;
+const START_MONEY = 10000;
+const SPAWN_COOLDOWN = 6;
+
 
 
 function createImage(src) {
   const image = new Image();
   image.src = src + '.png';
+  image.width = 35;
+  image.height = 35;
   return image
 }
+
+function createEnemyImage(src) {
+  const image = new Image();
+  image.src = src + '.png';
+  return image
+}  
+
+
 
 
 
 export const constants = {
 
-  FPS:               24,
-  ENEMY_SIZE:        80,
-  TOWER_SIZE_OFFSET: 15,
-  MAP_SIZE:          2040,
-  START_MONEY:       100000000,  
-  GRID_DIMS:         15,
-  NODE_SIZE:         2040 / 15,
-  SPAWN_COOLDOWN:    3,
+  FPS:               FPS,
+  ENEMY_SIZE:        ENEMY_SIZE,
+  TOWER_SIZE_OFFSET: TOWER_SIZE_OFFSET,
+  MAP_SIZE:          MAP_SIZE,
+  START_MONEY:       START_MONEY,  
+  GRID_DIMS:         GRID_DIMS,
+  NODE_SIZE:         NODE_SIZE,
+  SPAWN_COOLDOWN:    SPAWN_COOLDOWN,
 
   HEALTHBAR: {
     width:  80,
@@ -69,76 +97,41 @@ export const constants = {
 
   // enemy contains a base speed and base health that increase based on difficulty
   ENEMY_STATS: {
-    normal: buildEnemyObjects(20, 5),
+    normal: buildEnemyObjects(10, 5),
     speed:  buildEnemyObjects(20, 10),
-  },
-
-  // replace with image urls
-  ENEMY_COLORS: {
-    normal: 'rgb(180, 180, 180)',
-    speed:  'rgb(200, 150, 180)',
+    air:  buildEnemyObjects(20, 5),
+    strong: buildEnemyObjects(100, 5),
+    boss: buildEnemyObjects(1000, 7),
   },
 
   ENEMY_IMAGES: {
-    normal: {
-      up: normalUp,
-      down: normalDown,
-      left: normalLeft,
-      right: normalRight,
-    }
+    normal: normal,
+    air: normal,
+    strong: normal,
+    boss: normal,
+    speed: normal,
   },
 
   SELECTED_COLOR: 'rgba(255, 165, 0, ',
 
   // tower stats are base damage, base cost, range, shots per second, shotspread respectively
   TOWER_STATS: {
-    pellet:     buildTowerObjects(1, 100, 3, 4, 1, pellet, pelletFinal),
-    fire:       buildTowerObjects(2, 750, 2, 12, 2),
-    air:        buildTowerObjects(3, 1500, 3, 2, 3),
-    freeze:     buildTowerObjects(0, 2000, 1, 1, 10),
-    earthquake: buildTowerObjects(3, 3000, 3, 1, 10),
-    machine:    buildTowerObjects(3, 4000, 3, 24, 1),
+    pellet:     buildTowerObjects(1, 100, 2, 4, 1, true, false),
+    fire:       buildTowerObjects(1, 750, 1.5, 2, 5, true, true),
+    air:        buildTowerObjects(10, 1500, 3, 2, 3, false, true),
+    freeze:     buildTowerObjects(1, 2000, 1.5, 1, 10, true, false),
+    earthquake: buildTowerObjects(3, 3000, 1.5, 1, 10, true, false),
+    machine:    buildTowerObjects(3, 4000, 3, 24, 1, true, true),
   },
 
   // replace with image urls
   TOWER_IMAGES: {
-    pellet: {
-      base:  pellet,
-      final: pelletFinal
-    },
-    fire: {
-      base: fire,
-      final: fireFinal
-    },
-    air: {
-      base: air,
-      final: airFinal
-    },
-    earthquake: {
-      base: earthquake,
-      final: earthquakeFinal
-    },
-    freeze: {
-      base: freeze,
-      final: freezeFinal
-    },
-    machine: {
-      base: machine,
-      final: machineFinal
-    }
-  },
-
-  // tower stat labels for stat panel
-  TOWER_STAT_LABELS: {
-    type:   'type: ',
-    level:  'level: ',
-    damage: 'damage per shot: ',
-    // TODO: edit upgrade cost
-    cost:   'upgrade cost: ',
-    range:  'range: ',
-    reload: 'shots per second: ',
-    spread: 'shot spread: ',
-    sell:   'sell cost: ',
+    pellet: buildTowerImageObject(pellet, pelletDiagonal, pelletFinal, pelletFinalDiagonal),
+    fire: buildTowerImageObject(fire, fireDiagonal, fireFinal, fireFinalDiagonal),
+    air: buildTowerImageObject(air, air, airFinal, airFinal),
+    earthquake: buildTowerImageObject(earthquake, earthquake, earthquakeFinal, earthquakeFinal),
+    freeze: buildTowerImageObject(freeze, freeze, freezeFinal, freezeFinal),
+    machine: buildTowerImageObject(machine, machineDiagonal, machineFinal, machineFinalDiagonal),
   },
 
   // replace with image urls
@@ -152,6 +145,21 @@ export const constants = {
       color: '#430000'
     },
   },
+}
+
+
+
+function buildTowerImageObject(base, baseD, final, finalD) {
+  return {
+    base: {
+      regular: base,
+      diagonal: baseD
+    },
+    final: {
+      regular: final,
+      diagonal: finalD
+    }
+  }
 }
 
 
@@ -172,24 +180,26 @@ function buildEnemyObjects(baseHealth, baseSpeed) {
   }
 }
 
-function buildTowerObjects(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread) {
+function buildTowerObjects(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread, groundShot, airShot) {
   return {
-    easy:   buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread),
-    medium: buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread),
-    hard:   buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread),  
+    easy:   buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread, groundShot, airShot),
+    medium: buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread, groundShot, airShot),
+    hard:   buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread, groundShot, airShot),  
   }
 }
 
 
 // TODO: split cost into purchase price and upgrade cost
-function buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread) {
+function buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread, groundShot, airShot) {
   return {
     damage:         [baseDamage, baseDamage + 2, baseDamage + 5, baseDamage + 10, baseDamage + 20],
     purchaseCost:   baseCost,
-    upgradeCost:    [baseCost + 100, baseCost + 500, baseCost + 1000],
+    upgradeCost:    [baseCost + baseCost, baseCost + baseCost * 2.5, baseCost + baseCost * 7],
     range:          [baseRange,  baseRange,  baseRange + 1,  baseRange + 1, baseRange + 2],
     shotsPerSecond: shotsPerSecond,
     shotSpread:     shotSpread,
-    sellCost:       [baseCost * .75, (baseCost + 100) * .75, (baseCost + 500)  * .75, (baseCost + 1000 * .75)]
+    sellCost:       [baseCost * .75, (baseCost + 100) * .75, (baseCost + 500)  * .75, (baseCost + 1000 * .75)],
+    groundShot:     groundShot,
+    airShot:        airShot,
   }
 }

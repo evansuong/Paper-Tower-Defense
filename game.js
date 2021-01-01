@@ -17,7 +17,7 @@ export function Game(difficulty) {
   this.stats = {
     lives: LIVES[difficulty],
     money: START_MONEY,
-    level: 0,
+    level: 1,
     difficulty: difficulty,
   };
 
@@ -96,14 +96,18 @@ Game.prototype.getEnemiesInRange = function(tower) {
     let { col, row } = enemy.getCurrentNode();
 
     // check if enemy is in the range of this tower
-    if(col > tower.col - tower.range &&
+    if(col >= tower.col - tower.range &&
        col < tower.col + tower.range &&
-       row > tower.row - tower.range &&
+       row >= tower.row - tower.range &&
        row < tower.row + tower.range) {
 
         // add the enemy to range list
         if (!rangeFull) {
-          enemiesInRange.push(enemy);
+          if (tower.groundShot && enemy.type !== 'air') {
+            enemiesInRange.push(enemy);
+          } else if (tower.airShot && enemy.type === 'air') {
+            enemiesInRange.push(enemy);
+          }
         }
 
         // return when we have added the max amount of enemies for the tower
@@ -209,6 +213,9 @@ Game.prototype.buildTower = function(towerType, x, y, difficulty) {
   // add new tower to game tower list
   this.map.towers.set(tower.toHash(), tower);
 
+  // select newly placed tower
+  this.selectTower(tower.col * NODE_SIZE, tower.row * NODE_SIZE)
+
   // reset enemy search 
   this.map.enemies.forEach(enemy => {
     enemy.findPath();
@@ -249,13 +256,21 @@ Game.prototype.upgradeTower = function() {
   this.map.grid.nodes.forEach(node => {
 
     if (node.type === 'tower' && node.isSelected()) {
-
-      // get tower and upgarde it
+     
+      // access selected tower
       let towerToUpgrade = node.tower;
-      towerToUpgrade.upgrade();
+
+      // don't upgrade tower if you don't have enough money
+      if (this.stats.money < towerToUpgrade.upgradeCost) {
+        console.log('not enough money')
+        return;
+      }
 
       // subtract moeny
       this.stats.money = this.stats.money - towerToUpgrade.upgradeCost;
+
+      // upgarde it
+      towerToUpgrade.upgrade();
 
       // return updated stats
       stats = this.selectTower(towerToUpgrade.col * NODE_SIZE + 5, towerToUpgrade.row * NODE_SIZE + 5);
@@ -263,7 +278,6 @@ Game.prototype.upgradeTower = function() {
   });
   return stats;
 }
-
 
 Game.prototype.sellTower = function(refund=true) {
   this.map.grid.nodes.forEach(node => {
@@ -285,6 +299,10 @@ Game.prototype.sellTower = function(refund=true) {
 }
 
 Game.prototype.selectTower = function(x, y) {
+
+  // deselect all other towers
+  this.deselectTower();
+
   let { col, row } = this.map.grid.getNodeRowCol(x, y);
   let node = this.map.grid.getNode(col, row);
 
@@ -327,10 +345,15 @@ Game.prototype.onEnemyDeath = function(index) {
 }
 
 Game.prototype.getLevelStats = function() {
-  let { enemyType } = this.levels[0];
+
+  let type = false;
+  if (this.levels.length > 1) {
+    let { enemyType } = this.levels[1];
+    type = enemyType;
+  }
+
   return {
-    type: enemyType,
-    levels: this.levels,
+    type: type,
     ...this.stats
   }
 }
@@ -469,7 +492,6 @@ export function TowerNode(tower) {
 }
 
 TowerNode.prototype.select = function() {
-  console.log('selecting tower')
   this.selected = true;
 }
 
@@ -510,7 +532,6 @@ export function Tower(type, col, row, difficulty) {
   this.type           = type;
   this.level          = 1;
   this.damage         = TOWER_STATS[type][difficulty].damage[0];
-  // TODO: change this to uppgrade cost
   this.purchaseCost   = TOWER_STATS[type][difficulty].purchaseCost;
   this.upgradeCost    = TOWER_STATS[type][difficulty].upgradeCost[0];
   this.range          = TOWER_STATS[type][difficulty].range[0];
@@ -518,10 +539,13 @@ export function Tower(type, col, row, difficulty) {
   this.shotReloadTime = parseInt(FPS / TOWER_STATS[type][difficulty].shotsPerSecond);
   this.shotSpread     = TOWER_STATS[type][difficulty].shotSpread;
   this.sellCost       = TOWER_STATS[type][difficulty].sellCost[0];
+  this.groundShot     = TOWER_STATS[type][difficulty].groundShot;
+  this.airShot        = TOWER_STATS[type][difficulty].airShot;
   this.col            = col;
   this.row            = row;
   this.reloadElapsed  = this.shotReloadTime;
   this.difficulty     = difficulty;
+  this.orientation    = 'right';
   console.log('tower reload time (frames)', this.shotReloadTime);
   console.log('tower at ', this.col, this.row, 'initialized')
 }
@@ -533,17 +557,27 @@ Tower.prototype.shoot = function(enemiesInRange) {
   // shoot every enemy in range
   enemiesInRange.forEach(enemy => {
 
+    this.orientation = this.setOrientation(enemy.getCurrentNode());
+
     // don't shoot if reload time hasn't been met
     if (this.reloadElapsed < this.shotReloadTime) {
       this.reloadElapsed++;
     } else {
 
-      // shoot enemy
-      enemy.getShot(this.damage);
+      
+      if (this.type === 'fire') {
+        enemy.catchFire(this.damage / 10);
+      } else if (this.type === 'freeze') {
+        if (enemy.status !== 'frozen') enemy.freeze(this.damage);
+      } else {
+        // shoot enemy
+        enemy.getShot(this.damage);
+      }
       this.reloadElapsed = 0;
     }
   });
 }
+
 
 Tower.prototype.upgrade = function() {
   console.log('upgrade')
@@ -553,7 +587,7 @@ Tower.prototype.upgrade = function() {
     console.log('max level reached')
     return;
   }
-
+  
   // increment level
   this.level++;
   console.log(this.level)
@@ -564,11 +598,11 @@ Tower.prototype.upgrade = function() {
   this.range = TOWER_STATS[this.type][this.difficulty].range[this.level - 1];
   this.sellCost = TOWER_STATS[this.type][this.difficulty].sellCost[this.level - 1];
 
-  console.log(this.damage, this.upgradeCost, this.range, this.sellCost)
+
+  // console.log(this.damage, this.upgradeCost, this.range, this.sellCost)
 }
 
 Tower.prototype.getStats = function() {
-  console.log('getting stats')
   return {
     type:   this.type,
     level:  this.level,
@@ -586,6 +620,35 @@ Tower.prototype.getStats = function() {
 Tower.prototype.toHash = function() {
   return this.type + this.col.toString() + this.row.toString()
 }
+
+
+Tower.prototype.setOrientation = function({ col, row }) {
+
+  if (this.col < col && this.row < row) {
+    return 'downright';
+  } else if (this.col < col && this.row === row) {
+    return 'right';
+  } else if (this.col < col && this.row > row) {
+    return 'upright';
+  } else if (this.col === col && this.row < row) {
+    return 'down';
+  } else if (this.col === col && this.row > row) {
+    return 'up';
+  } else if (this.col > col && this.row < row) {
+    return 'downleft';
+  } else if (this.col > col && this.row === row) {
+    return 'left';
+  } else if (this.col > col && this.row > row) {
+    return 'upleft';
+  } else {
+    return 'down';
+  }
+}
+
+Tower.prototype.getOrientation = function() {
+  return this.orientation;
+}
+
 
 
 
@@ -621,7 +684,7 @@ export function Enemy(
   this.y              = spawnRow * NODE_SIZE + ENEMY_SIZE / 2;
   this.endNode        = { col: endCol, row: endRow },
   this.grid           = grid;
-  this.color          = ENEMY_COLORS[type];
+  this.difficulty     = difficulty;
   this.path           = [];
   this.speed          = ENEMY_STATS[type][difficulty].speed;
   this.startingHealth = ENEMY_STATS[type][difficulty].health;
@@ -629,6 +692,9 @@ export function Enemy(
   this.onReachedEnd   = onReachedEnd;
   this.onDeath        = onDeath;
   this.orientation    = 'right';
+  this.status         = 'none';
+  this.statusCounter  = 0;
+  this.fireDamage     = 0;
   this.findPath()
 }
 
@@ -664,6 +730,39 @@ Enemy.prototype.update = function() {
   let { nextX, nextY } = this.calculateMovement(nextNode, this.currentNode);
   this.x = this.x + nextX;
   this.y = this.y + nextY;
+
+  // check if enemy is on fire
+  if (this.status === 'fire') {
+    
+    // inflict fire damage
+    this.getShot(this.fireDamage);
+    this.statusCounter = this.statusCounter + 1;
+
+    // if enemy has been on fire for 100 frames
+    if (this.statusCounter > 100) {
+
+      // reset status
+      this.status = 'none';
+      this.statusCounter = 0;
+    }
+  }
+
+  // check if enemy is frozen
+  if (this.status === 'frozen') {
+    this.statusCounter = this.statusCounter + 1;
+
+    // if enemy has been frozen for 100 frames
+    if (this.statusCounter > 100) {
+
+      // reset status
+      this.status = 'none';
+      this.statusCounter = 0;
+
+      // reset speed
+      this.speed = ENEMY_STATS[this.type][this.difficulty].speed;
+      console.log('resetting speed to:', this.speed)
+    }
+  }
 }
 
 
@@ -681,7 +780,7 @@ Enemy.prototype.getCurrentNode = function() {
   // get the current node that the enemy is in
   let col = Math.floor((this.x - xOffset) / NODE_SIZE);
   let row = Math.floor((this.y - yOffset) / NODE_SIZE);
-  console.log(col, row)
+  // console.log(col, row)
 
   return { col: col, row: row };
 }
@@ -689,8 +788,9 @@ Enemy.prototype.getCurrentNode = function() {
 
 Enemy.prototype.calculateMovement = function(nextNode, currentNode) {
 
-  // check if enemy should move horizontally and in what direction
+  // check if enemy should move and in what direction
   let xMovement = 0;
+  let yMovement = 0;
 
   // is the next node in the column to left or right
   if (nextNode.col > currentNode.col) {
@@ -699,19 +799,13 @@ Enemy.prototype.calculateMovement = function(nextNode, currentNode) {
   } else if (nextNode.col < currentNode.col) {
     xMovement = -this.speed;
     this.orientation = 'left';
-  }
-
-  // check if enemy should move vertically and in what direction
-  let yMovement = 0;
-
-  // is the next node in the row above or below
-  if(nextNode.row > currentNode.row) {
+  } else if(nextNode.row > currentNode.row) {
     yMovement = this.speed;
     this.orientation = 'down';
   } else if (nextNode.row < currentNode.row) {
     yMovement = -this.speed;
     this.orientation = 'up';
-  }
+  } 
 
   // returns the amount and in which direction the enemy will move next update
   return { nextX: xMovement, nextY: yMovement };
@@ -724,25 +818,36 @@ Enemy.prototype.findPath = function() {
   let startNode = this.getCurrentNode();
   let endNode = { col: this.endNode.col, row: this.endNode.row };
 
-  // convert node grid to astar tranparency grid
-  let aStarGrid = new Graph(buildAStarGrid(this.grid));
+  let aStarGrid = [];
+  if (this.type === 'air') {
+    aStarGrid = new Graph(this.getAirGrid());
+  } else {
+    aStarGrid = new Graph(buildAStarGrid(this.grid));
+  }
 
   // declare start and end nodes
   var start = aStarGrid.grid[startNode.row][startNode.col];
   var end = aStarGrid.grid[endNode.row][endNode.col];
 
-  // console.log('start node 324', start)
-  // console.log('endNode 325', end)
   // get shortest path from start to end node
   var resultWithDiagonals = astar.search(
     aStarGrid, 
     start, 
     end, 
-    {
-      heuristic: astar.heuristics.diagonal 
-    }
   );
   this.path = getPathFromAStar(resultWithDiagonals);
+}
+
+Enemy.prototype.getAirGrid = function() {
+  let newGrid = [];
+  for (let row = 0; row < GRID_DIMS; row++) {
+    let gridRow = [];
+    for (let col = 0; col < GRID_DIMS; col++) {
+      gridRow.push(1);
+    }
+    newGrid.push(gridRow);
+  }
+  return newGrid;
 }
 
 Enemy.prototype.getShot = function(damage) {
@@ -751,6 +856,19 @@ Enemy.prototype.getShot = function(damage) {
   if(this.currentHealth <= 0) {
     this.onDeath(this.index);
   }
+}
+
+Enemy.prototype.catchFire = function(fireDamage) {
+  if (this.status === 'frozen') {
+    this.speed = ENEMY_STATS[this.type][this.difficulty].speed;
+  }
+  this.fireDamage = fireDamage;
+  this.status = 'fire';
+}
+
+Enemy.prototype.freeze = function(slowness) {
+  this.speed = this.speed - slowness;
+  this.status = 'frozen';
 }
 
 Enemy.prototype.getOrientation = function() {

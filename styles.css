@@ -14,7 +14,7 @@ body {
   margin: 0;
   background-color: aliceblue;
   background-image: url('./res/background.jpg');
-  background-size: cover;
+  background-size: 220vh;
 }
 
 canvas {
@@ -47,8 +47,9 @@ canvas {
   margin-bottom: 5px;
   justify-content: center;
   align-items: center;
-  font-family: titlefont;
-  font-size: 5vw;
+  font-family: textfont;
+  color: blue;
+  font-size: 7vw;
 }
 
 .author {
@@ -122,7 +123,7 @@ canvas {
   align-items: center;
 
   font-family: textfont;
-  font-size: 2.2vw;
+  font-size: 28px;
 
   width: 230px;
   height: 230px;
@@ -143,7 +144,7 @@ canvas {
 }
 
 #next-level * {
-  margin-top: 2px;
+  margin-top: 15px;
   width: 50px;
   height: 50px;
 }
@@ -189,40 +190,47 @@ canvas {
 .action-panel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-
-  background-image: url('./res/tower-panel-background.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  transform: rotate(-2deg);
-
-  padding: 20px;
-  height: 80vh;
+  justify-content: center;
 }
 
-.game-store {
+.tower-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   font-family: textfont;
-  font-size: 30px;
+  font-size: 40px;
+  color: red;
+
+  
+  background-image: url('./res/tower-panel-background.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  transform: rotate(-2deg);
+
+  margin-top: -20px;
+  margin-left: -15px;
+  padding: 10px;
+  padding-top: 50px;
+  width: 300px;
+  height: 375px;
 }
 
 .tower-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   width: min-content;
-  margin-left: 30px;
   border-color: black;
   border-width: 5px;
 }
 
 .tower-grid * {
   margin: 3px;
-  background-color: rgba(0, 0, 0, .4);
-  padding: 5px;
-  border-radius: 5px;;
+  border-style: dashed;
+  color: black;
+  /* background-color: rgba(0, 0, 0, .4); */
+  padding: 1px;
+  border-radius: 5px;
 }
 
 #tower-stat-wrapper {
@@ -230,8 +238,47 @@ canvas {
   flex-direction: column;
   align-items: center;
   font-family: textfont;
-  font-size: 25px;
+  font-size: 22px;
+  margin: 19px;
+}
+
+.tower-stats {
+  display: flex;
+}
+
+#labels {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 10px;
+}
+
+#values {
+  width: 75px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 130px;
   margin: 20px;
+  font-size: 30px;
+}
+
+.buttons * {
+  width: 40px;
+}
+
+#sell-btn {
+  color: blue;
+}
+
+#upgrade-btn {
+  color: green;
+  margin-right: 20px;
 }
 
 .tower-wrapper {
@@ -257,19 +304,19 @@ canvas {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: 30px;
 }
 
-.next-lvl-btn-wrapper {
+#next-lvl-btn-wrapper {
   background-image: url('res/next-arrow.png');
   background-size: contain;
   background-repeat: no-repeat;
-  padding: 50px;
-  margin-left: 30px;
+  padding: 35px;
 }
 
 #next-lvl-btn {
   font-size: 30px;
-  margin-top: -20px;
+  margin-top: -10px;
 }
 
 #pause-btn {
