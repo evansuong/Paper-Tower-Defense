@@ -51,6 +51,7 @@ Display.prototype.drawImage = function(img, x, y, width, height, orientation) {
   }
 }
 
+
 // draws background to the buffer
 Display.prototype.fill = function(color) {
   this.buffer.fillStyle = color;

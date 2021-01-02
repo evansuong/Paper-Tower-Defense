@@ -183,7 +183,7 @@ function onStoreMouseClick(e) {
   // create tower drag image when user wants to place a tower
   let dragObject = document.createElement('div');
   dragObject.id = `${e.target.id}`;
-  dragObject.appendChild(TOWER_IMAGES[dragObject.id].base.regular);
+  dragObject.appendChild(TOWER_IMAGES[dragObject.id].base.regular.resting);
   controller.onMouseClick(e, dragObject);
 
   // event listener to have tower follow mouse points
@@ -545,6 +545,10 @@ function drawMap() {
       else towerImg = towerImg.base;
       if (node.tower.getOrientation().length > 5) towerImg = towerImg.diagonal;
       else towerImg = towerImg.regular;
+      if (node.tower.getShooting()) towerImg = towerImg.shooting;
+      else towerImg = towerImg.resting;
+
+      console.log(node.tower.getShooting())
 
       // console.log(node.tower.getOrientation())
       display.drawImage(

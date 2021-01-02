@@ -9,29 +9,49 @@ const bossImg = createEnemyImage('res/boss');
 const paperHole = new Image();
 paperHole.src = 'res/paper-hole.png';
 
+
 const pellet = createImage('res/p');
-const pelletDiagonal = createImage('res/pd')
+const pelletDiagonal = createImage('res/pd');
+const pelletShooting = createImage('res/ps');
+const pelletDiagonalShooting = createImage('res/pds');
 const pelletFinal = createImage('res/p2');
 const pelletFinalDiagonal = createImage('res/p2d');
+const pelletFinalShooting = createImage('res/p2s');
+const pelletFinalDiagonalShooting = createImage('res/p2ds');
 
 const fire = createImage('res/f');
 const fireDiagonal = createImage('res/fd');
 const fireFinal = createImage('res/f2');
 const fireFinalDiagonal = createImage('res/f2d');
+const fireShooting = createImage('res/fs');
+const fireDiagonalShooting = createImage('res/fds');
+const fireFinalShooting = createImage('res/f2s');
+const fireFinalDiagonalShooting = createImage('res/f2ds');
+
 
 const freeze = createImage('res/i');
+const freezeShooting = createImage('res/is');
 const freezeFinal = createImage('res/i2');
+const freezeFinalShooting = createImage('res/i2s');
 
 const earthquake = createImage('res/e');
+const earthquakeShooting = createImage('res/es');
 const earthquakeFinal = createImage('res/e2');
+const earthquakeFinalShooting = createImage('res/e2s');
 
 const machine = createImage('res/m');
+const machineShooting = createImage('res/ms');
 const machineDiagonal = createImage('res/md');
+const machineDiagonalShooting = createImage('res/mds');
 const machineFinal = createImage('res/m2');
+const machineFinalShooting = createImage('res/m2s');
 const machineFinalDiagonal = createImage('res/m2d');
+const machineFinalDiagonalShooting = createImage('res/m2ds');
 
 const air = createImage('res/a');
+const airShooting = createImage('res/as');
 const airFinal = createImage('res/a2');
+const airFinalShooting = createImage('res/a2s');
 
 
 const MAP_SIZE = 2040;
@@ -130,12 +150,66 @@ export const constants = {
 
   // replace with image urls
   TOWER_IMAGES: {
-    pellet: buildTowerImageObject(pellet, pelletDiagonal, pelletFinal, pelletFinalDiagonal),
-    fire: buildTowerImageObject(fire, fireDiagonal, fireFinal, fireFinalDiagonal),
-    air: buildTowerImageObject(air, air, airFinal, airFinal),
-    earthquake: buildTowerImageObject(earthquake, earthquake, earthquakeFinal, earthquakeFinal),
-    freeze: buildTowerImageObject(freeze, freeze, freezeFinal, freezeFinal),
-    machine: buildTowerImageObject(machine, machineDiagonal, machineFinal, machineFinalDiagonal),
+    pellet: buildTowerImageObject(
+      pellet, 
+      pelletDiagonal, 
+      pelletShooting, 
+      pelletDiagonalShooting,
+      pelletFinal, 
+      pelletFinalDiagonal,
+      pelletFinalShooting,
+      pelletFinalDiagonalShooting,
+    ),
+    fire: buildTowerImageObject(
+      fire, 
+      fireDiagonal, 
+      fireShooting, 
+      fireDiagonalShooting,
+      fireFinal, 
+      fireFinalDiagonal,
+      fireFinalShooting,
+      fireFinalDiagonalShooting,
+    ),
+    air: buildTowerImageObject(
+      air, 
+      air, 
+      airShooting, 
+      airShooting, 
+      airFinal, 
+      airFinal, 
+      airFinalShooting, 
+      airFinalShooting, 
+    ),
+    earthquake: buildTowerImageObject(
+      earthquake, 
+      earthquake, 
+      earthquakeShooting, 
+      earthquakeShooting, 
+      earthquakeFinal, 
+      earthquakeFinal, 
+      earthquakeFinalShooting, 
+      earthquakeFinalShooting, 
+    ),
+    freeze: buildTowerImageObject(
+      freeze, 
+      freeze, 
+      freezeShooting, 
+      freezeShooting, 
+      freezeFinal, 
+      freezeFinal, 
+      freezeFinalShooting, 
+      freezeFinalShooting, 
+    ),
+    machine: buildTowerImageObject(
+      machine, 
+      machineDiagonal, 
+      machineShooting, 
+      machineDiagonalShooting,
+      machineFinal, 
+      machineFinalDiagonal,
+      machineFinalShooting,
+      machineFinalDiagonalShooting,
+    ), 
   },
 
   // replace with image urls
@@ -153,15 +227,27 @@ export const constants = {
 
 
 
-function buildTowerImageObject(base, baseD, final, finalD) {
+function buildTowerImageObject(base, baseD, baseS, baseDS, final, finalD, finalS, finalDS) {
   return {
     base: {
-      regular: base,
-      diagonal: baseD
+      regular: {
+        resting: base,
+        shooting: baseS
+      },
+      diagonal: {
+        resting: baseD,
+        shooting: baseDS,
+      }
     },
     final: {
-      regular: final,
-      diagonal: finalD
+      regular: {
+        resting: final,
+        shooting: finalS,
+      },
+      diagonal: {
+        resting: finalD,
+        shooting: finalDS,
+      }
     }
   }
 }

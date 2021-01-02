@@ -79,7 +79,12 @@ Game.prototype.update = function() {
 
     // for each enemy in range, call shoot on them
     let enemiesInRange = this.getEnemiesInRange(tower);
-    if(enemiesInRange) tower.shoot(enemiesInRange);
+    if(enemiesInRange && enemiesInRange.length > 0) {
+      tower.setShooting(true);
+      tower.shoot(enemiesInRange);
+    } else {
+      tower.setShooting(false);
+    }
   })
 }
 
@@ -546,9 +551,32 @@ export function Tower(type, col, row, difficulty) {
   this.row            = row;
   this.reloadElapsed  = this.shotReloadTime;
   this.difficulty     = difficulty;
+  this.isShooting     = false;
   this.orientation    = 'right';
   console.log('tower reload time (frames)', this.shotReloadTime);
   console.log('tower at ', this.col, this.row, 'initialized')
+}
+
+
+Tower.prototype.setShooting = function(isShooting) {
+  console.log('settingSHot to', isShooting)
+  this.isShooting = isShooting;
+}
+
+Tower.prototype.getShooting = function() {
+  if (this.shotSpread > 1) {
+    if (this.isShooting && this.reloadElapsed >= this.shotReloadTime / 2) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    if (this.isShooting && this.reloadElapsed >= this.shotReloadTime) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 
@@ -556,27 +584,26 @@ Tower.prototype.shoot = function(enemiesInRange) {
 
   // TODO: HAVE TOWERS SHOOT AT FIXED TIMES
   // shoot every enemy in range
-  enemiesInRange.forEach(enemy => {
+  // don't shoot if reload time hasn't been met
+  if (this.reloadElapsed < this.shotReloadTime) {
+    this.reloadElapsed++;
+  } else {
+    enemiesInRange.forEach(enemy => {
 
-    this.orientation = this.setOrientation(enemy.getCurrentNode());
+      this.orientation = this.setOrientation(enemy.getCurrentNode());
 
-    // don't shoot if reload time hasn't been met
-    if (this.reloadElapsed < this.shotReloadTime) {
-      this.reloadElapsed++;
-    } else {
-
-      
       if (this.type === 'fire') {
         enemy.catchFire(this.damage / 10);
       } else if (this.type === 'freeze') {
-        if (enemy.status !== 'frozen') enemy.freeze(this.damage);
+        if (enemy.status !== 'frozen') enemy.freeze(this.damage / 3);
       } else {
         // shoot enemy
         enemy.getShot(this.damage);
       }
       this.reloadElapsed = 0;
-    }
-  });
+    
+    });
+  }
 }
 
 
