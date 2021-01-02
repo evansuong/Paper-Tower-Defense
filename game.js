@@ -103,9 +103,9 @@ Game.prototype.getEnemiesInRange = function(tower) {
 
         // add the enemy to range list
         if (!rangeFull) {
-          if (tower.groundShot && enemy.type !== 'air') {
+          if (tower.groundShot && enemy.type !== 'flying') {
             enemiesInRange.push(enemy);
-          } else if (tower.airShot && enemy.type === 'air') {
+          } else if (tower.airShot && enemy.type === 'flying') {
             enemiesInRange.push(enemy);
           }
         }
@@ -155,6 +155,7 @@ Game.prototype.createEnemy = function({ type, id }) {
   let endNode = this.map.grid.getEndNode();
   let enemy = new Enemy(
     type, 
+    this.stats.level,
     id, 
     startNode.col, 
     startNode.row,
@@ -348,7 +349,7 @@ Game.prototype.getLevelStats = function() {
 
   let type = false;
   if (this.levels.length > 1) {
-    let { enemyType } = this.levels[1];
+    let { enemyType } = this.levels[0];
     type = enemyType;
   }
 
@@ -666,6 +667,7 @@ const { ENEMY_STATS, ENEMY_COLORS, ENEMY_SIZE } = constants;
 
 export function Enemy(
   type, 
+  level,
   index, 
   spawnCol, 
   spawnRow, 
@@ -687,7 +689,8 @@ export function Enemy(
   this.difficulty     = difficulty;
   this.path           = [];
   this.speed          = ENEMY_STATS[type][difficulty].speed;
-  this.startingHealth = ENEMY_STATS[type][difficulty].health;
+  this.startingHealth = ENEMY_STATS[type][difficulty].health * (1 + level / 10);
+  console.log(this.startingHealth)
   this.currentHealth  = this.startingHealth; 
   this.onReachedEnd   = onReachedEnd;
   this.onDeath        = onDeath;
@@ -819,8 +822,8 @@ Enemy.prototype.findPath = function() {
   let endNode = { col: this.endNode.col, row: this.endNode.row };
 
   let aStarGrid = [];
-  if (this.type === 'air') {
-    aStarGrid = new Graph(this.getAirGrid());
+  if (this.type === 'flying') {
+    aStarGrid = new Graph(this.getFlyingGrid());
   } else {
     aStarGrid = new Graph(buildAStarGrid(this.grid));
   }
@@ -838,7 +841,7 @@ Enemy.prototype.findPath = function() {
   this.path = getPathFromAStar(resultWithDiagonals);
 }
 
-Enemy.prototype.getAirGrid = function() {
+Enemy.prototype.getFlyingGrid = function() {
   let newGrid = [];
   for (let row = 0; row < GRID_DIMS; row++) {
     let gridRow = [];

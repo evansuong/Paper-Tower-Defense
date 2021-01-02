@@ -134,8 +134,8 @@ nextLevelBtn.addEventListener('click', () => {
 })
 
 // allow tower to be upgraded and sold
-upgradeBtn.addEventListener('click', () => onUpgradeBtnClick());
-sellBtn.addEventListener('click', () => onSellBtnClick());
+upgradeBtn.addEventListener('click', onUpgradeBtnClick);
+sellBtn.addEventListener('click', onSellBtnClick);
 
 
 // GAME STAT LABELS
@@ -313,8 +313,10 @@ function setTowerStatFields(towerStats) {
     if (towerStats.level < 4) {
       // console.log('upgrading')4
       upgradeBtn.innerHTML = 'upgrade $' + towerStats.cost;
+      upgradeBtn.addEventListener('click', onUpgradeBtnClick);
     } else {
       upgradeBtn.innerHTML = '';
+      upgradeBtn.removeEventListener('click', onUpgradeBtnClick);
     }
 
     sellBtn.innerHTML = 'sell $' + towerStats.sell;

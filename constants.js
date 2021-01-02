@@ -1,6 +1,10 @@
 
 
-const normal = createEnemyImage('res/nr');
+const normalImg = createEnemyImage('res/normal');
+const flyingImg = createEnemyImage('res/flying');
+const speedImg = createEnemyImage('res/speed');
+const strongImg = createEnemyImage('res/strong');
+const bossImg = createEnemyImage('res/boss');
 
 const paperHole = new Image();
 paperHole.src = 'res/paper-hole.png';
@@ -36,7 +40,7 @@ const NODE_SIZE = MAP_SIZE / GRID_DIMS;
 const FPS = 24;
 const ENEMY_SIZE = 80;
 const TOWER_SIZE_OFFSET = 15;
-const START_MONEY = 10000;
+const START_MONEY = 10000000;
 const SPAWN_COOLDOWN = 6;
 
 
@@ -97,19 +101,19 @@ export const constants = {
 
   // enemy contains a base speed and base health that increase based on difficulty
   ENEMY_STATS: {
-    normal: buildEnemyObjects(10, 5),
+    normal: buildEnemyObjects(20, 5),
     speed:  buildEnemyObjects(20, 10),
-    air:  buildEnemyObjects(20, 5),
-    strong: buildEnemyObjects(100, 5),
+    flying:  buildEnemyObjects(30, 5),
+    strong: buildEnemyObjects(100, 3),
     boss: buildEnemyObjects(1000, 7),
   },
 
   ENEMY_IMAGES: {
-    normal: normal,
-    air: normal,
-    strong: normal,
-    boss: normal,
-    speed: normal,
+    normal: normalImg,
+    flying: flyingImg,
+    strong: strongImg,
+    boss: bossImg,
+    speed: speedImg,
   },
 
   SELECTED_COLOR: 'rgba(255, 165, 0, ',
@@ -198,7 +202,7 @@ function buildTower(baseDamage, baseCost, baseRange, shotsPerSecond, shotSpread,
     range:          [baseRange,  baseRange,  baseRange + 1,  baseRange + 1, baseRange + 2],
     shotsPerSecond: shotsPerSecond,
     shotSpread:     shotSpread,
-    sellCost:       [baseCost * .75, (baseCost + 100) * .75, (baseCost + 500)  * .75, (baseCost + 1000 * .75)],
+    sellCost:       [Math.floor(baseCost * .75), Math.floor((baseCost + baseCost) * .75), Math.floor((baseCost + baseCost * 2.5)  * .75), Math.floor((baseCost + baseCost * 7) * .75)],
     groundShot:     groundShot,
     airShot:        airShot,
   }
