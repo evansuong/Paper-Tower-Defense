@@ -60,7 +60,7 @@ const NODE_SIZE = MAP_SIZE / GRID_DIMS;
 const FPS = 24;
 const ENEMY_SIZE = 80;
 const TOWER_SIZE_OFFSET = 15;
-const START_MONEY = 10000000;
+const START_MONEY = 2000;
 const SPAWN_COOLDOWN = 6;
 
 
